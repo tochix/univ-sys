@@ -1,6 +1,7 @@
 package com.ogb.anselm.univ.sys;
 
-import java.awt.List;
+import java.util.List;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import junit.framework.Test;
@@ -15,17 +16,17 @@ public class CourseTest extends TestCase {
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
 	
-	public void testCourseTitleShouldReturnSameTitle() {
+	public void testCourseTitleShouldReturnSameTitle() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
 		assertEquals("Course title is different from the one provided.", "Applied Chemistry", course.title());
 	}
 	
-	public void testCourseShouldHaveTwoOrLessMidterms() {
+	public void testCourseShouldHaveTwoOrLessMidterms() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
 		assertEquals("Course midterms doesn't return correct value", 2, course.numMidTerms());
 	}
 	
-	public void testCourseShouldHaveSixDigitCode() {
+	public void testCourseShouldHaveSixDigitCode() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
 		assertTrue("Course code is not an integer", course.code() instanceof Integer);
 		
@@ -35,11 +36,10 @@ public class CourseTest extends TestCase {
 		assertEquals("Course returned a different course code", 123243, courseCode);
 	}
 	
-	public void testCourseShouldListStudentsInCourse() {
+	public void testCourseShouldListStudentsInCourse() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
 		
 		List<Student> students = course.students();
-		assertTrue("Course does not return list of students", students instanceof List);
 		assertTrue("Student list is not empty", students.isEmpty());
 		
 		Student student1 = new Student("Denzel Washington", 10160139, 12);
@@ -48,21 +48,38 @@ public class CourseTest extends TestCase {
 		course.addStudent(student1);
 		course.addStudent(student2);
 		
-		List<Student> students = course.students();
-		assertTrue("Course does not return list of students", students instanceof List);
+		students = course.students();
 		assertFalse("Student list is empty", students.isEmpty());
-		assertEquals("Wrong number of students registered for course", 2, students.getSize());
+		assertTrue("Course does not return list of students", students.get(0) instanceof Student);
+		assertEquals("Wrong number of students registered for course", 2, students.size());
 	}
 	
-	public void testCourseShouldListPreRequisites() {
+	public void testCourseShouldListPreRequisites() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
 		
 		List<Integer> preCourses = course.preRequisites();
-		assertTrue("Course does not return list of pre-requisites", preCourses instanceof List);
 		assertTrue("Pre-requisites list is not empty", preCourses.isEmpty());
 		
-		Course course1 = new Course(true, 2, 5, false, 24, "Algebra");
-		Course course2 = new Course(true, 2, 5, false, 26, "Organic Chemistry");
+		Course course1 = new Course(true, 2, 5, false, 26, "Algebra", 123244);
+		Course course2 = new Course(true, 2, 5, false, 26, "Organic Chemistry", 123245);
+		
+		List<Course> courses = new ArrayList<Course>();
+		courses.add(course1);
+		courses.add(course2);
+		
+		course.addPreRequisites(courses);
+		
+		preCourses = course.preRequisites();
+		assertFalse("Pre-requisites list is empty", preCourses.isEmpty());
+		assertTrue("Course does not return list of pre-requisites", preCourses.get(0) instanceof Integer);
+		assertEquals("Wrong number of Pre-requisites returned for course", 2, preCourses.size());
+	}
+	
+	public void testCourseShouldNotAddDuplicatePreRequisites() throws CourseException, IOException {
+		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
+		
+		Course course1 = new Course(true, 2, 5, false, 26, "Algebra", 123244);
+		Course course2 = new Course(true, 2, 5, false, 26, "Organic Chemistry", 123245);
 		
 		List<Course> courses = new ArrayList<Course>();
 		courses.add(course1);
@@ -71,33 +88,81 @@ public class CourseTest extends TestCase {
 		course.addPreRequisites(courses);
 		
 		List<Integer> preCourses = course.preRequisites();
-		assertTrue("Course does not return list of pre-requisites", students instanceof List);
-		assertFalse("Pre-requisites list is empty", students.isEmpty());
-		assertEquals("Wrong number of Pre-requisites returned for course", 2, students.getSize());
+		assertFalse("Pre-requisites list is empty", preCourses.isEmpty());
+		assertTrue("Course does not return list of pre-requisites", preCourses.get(0) instanceof Integer);
+		assertEquals("Wrong number of Pre-requisites returned for course", 2, preCourses.size());
+		
+		List<Course> duplicateCourses = new ArrayList<Course>();
+		duplicateCourses.add(course2);
+		course.addPreRequisites(duplicateCourses);
+		assertEquals("Duplicate course was added to Pre-requisite", 2, preCourses.size());
 	}
 	
-	public void testCourseShouldReturnWeightOfAssignment() {
+	public void testCourseShouldReturnWeightOfAssignment() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
-		course.addAssignment(12324301, 10, "First Assignment");
+		course.addAssignment(12324301, 10);
 		
 		assertEquals("Course returns wrong assignment weight", 10, course.weightOfAssignment(12324301));
 	}
 	
-	public void testCourseShouldReturnWeightofMidterm() {
+	public void testCourseShouldReturnWeightofMidterm() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
-		course.addMiterm(12324302, 25, "October Midterm");
+		course.addMiterm(12324302, 25);
 		
 		assertEquals("Course returns wrong midterm weight", 25, course.weightOfMidterm(12324302));
 	}
 	
-	public void testCourseShouldReturnWeightOfFinal() {
+	public void testCourseShouldReturnWeightOfFinal() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
 		course.addFinalExam(60);
 		
 		assertEquals("Course returns wrong weight for final", 60, course.weightOfFinal());
 	}
 	
-	public void testCourseShouldReturnMarkForStudent() {
+	public void testCourseShouldThrowExceptionWhenGradeWeightExceedsHundred() throws CourseException, IOException {
+		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
+		
+		course.addFinalExam(60);
+		course.addMiterm(12324302, 25);
+		
+	    try {
+	    		course.addAssignment(12324301, 20);
+	    		fail("Exceeding grade weight of 100 doesn't throw an exception");
+		} catch (CourseException e) {
+		}
+	}
+	
+	public void testCourseShouldThrowExceptionWhenStudentGradeIsAboveHundred() throws CourseException, IOException {
+		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
+		Student student = new Student("Ethan Hawke", 10160149, 16);
+		
+		course.addStudent(student);
+		course.addFinalExam(100);
+		
+		try {
+			course.addStudentGradeForFinal(student, 101);
+	    		fail("Adding student above hundred doesn't throw an exception");
+		} catch (CourseException e) {
+			assertEquals(e.getMessage(), "Student's mark for course exceeds 100");
+		}
+	}
+	
+	public void testCourseShouldThrowExceptionWhenAddingGradeForGhostStudent() throws CourseException, IOException {
+		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
+		Student student = new Student("Ethan Hawke", 10160149, 16);
+		
+		course.addFinalExam(100);
+		
+		try {
+			course.addStudentGradeForFinal(student, 98);
+	    		fail("Adding a grade for an unregistered course student doesn't throw an exception");
+		} catch (CourseException e) {
+			assertEquals(7, e.getErrorCode());
+			assertEquals(e.getMessage(), "The student is not registered for this course");
+		}
+	}
+	
+	public void testCourseShouldReturnMarkForStudent() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
 		Student student = new Student("Ethan Hawke", 10160149, 16);
 		
@@ -107,12 +172,12 @@ public class CourseTest extends TestCase {
 		assertEquals("Course returns wrong mark for student", 75, course.markForStudent(student));
 	}
 	
-	public void testCourseShouldReturnFalseForProject() {
+	public void testCourseShouldReturnFalseForProject() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
 		assertFalse(course.hasProject());
 	}
 	
-	public void testCourseShouldStateCapacityOfCourse() {
+	public void testCourseShouldStateCapacityOfCourseAndNotGoOverLimit() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
 		Student student1 = new Student("Ethan Hawke", 10160149, 16);
 		
@@ -175,13 +240,17 @@ public class CourseTest extends TestCase {
 		course.addStudent(student26);
 		assertTrue(course.isFull());
 		
-		exception.expect(CourseException.class);
-	    exception.expectMessage("Course is full. Can no longer register students");
-	    Student student27 = new Student("Bella Hawke", 10160175, 16);
-		course.addStudent(student27);
+		try {
+			Student student27 = new Student("Bella Hawke", 10160175, 16);
+			course.addStudent(student27);
+			fail("Exception not throw on registering student after course limit has been reached.");
+		} catch (CourseException e) {
+			assertEquals(8, e.getErrorCode());
+			assertEquals(e.getMessage(), "Course is full. Can no longer register students.");
+		}
 	}
 	
-	public void testCourseShouldRegisterStudentToCourse() {
+	public void testCourseShouldRegisterStudentToCourse() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
 		
 		List<Student> students = course.students();
@@ -194,13 +263,13 @@ public class CourseTest extends TestCase {
 		course.addStudent(student1);
 		course.addStudent(student2);
 		
-		List<Student> students = course.students();
+		students = course.students();
 		assertTrue("Course does not return list of students", students instanceof List);
 		assertFalse("Student list is empty", students.isEmpty());
-		assertEquals("Wrong number of students registered for course", 2, students.getSize());
+		assertEquals("Wrong number of students registered for course", 2, students.size());
 	}
 	
-	public void testCourseShouldRemoveStudentFromCourse() {
+	public void testCourseShouldRemoveStudentFromCourse() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
 		
 		List<Student> students = course.students();
@@ -213,15 +282,28 @@ public class CourseTest extends TestCase {
 		course.addStudent(student1);
 		course.addStudent(student2);
 		
-		List<Student> students = course.students();
+		students = course.students();
 		assertTrue("Course does not return list of students", students instanceof List);
 		assertFalse("Student list is empty", students.isEmpty());
-		assertEquals("Wrong number of students registered for course", 2, students.getSize());
+		assertEquals("Wrong number of students registered for course", 2, students.size());
 		
 		course.removeStudent(student1);
-		List<Student> students = course.students();
-		assertEquals("Wrong number of students registered for course", 1, students.getSize());
-		assertSame(student2, students[0]);
+		students = course.students();
+		assertEquals("Wrong number of students registered for course", 1, students.size());
+		assertSame(student2, students.get(0));
+	}
+	
+	public void testCourseShouldThrowExceptionOnRemovingGhostStudent() throws CourseException, IOException {
+		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
+		Student student1 = new Student("Denzel Washington", 10160139, 12);
+		
+		try {
+			course.removeStudent(student1);
+	    		fail("Exception not thrown when removing an unregistered course student.");
+		} catch (CourseException e) {
+			assertEquals(7, e.getErrorCode());
+			assertEquals(e.getMessage(), "The student is not registered for this course");
+		}
 	}
 	
 }
