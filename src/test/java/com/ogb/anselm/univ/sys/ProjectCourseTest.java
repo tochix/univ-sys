@@ -27,4 +27,19 @@ public class ProjectCourseTest extends TestCase {
 			assertEquals(e.getMessage(), "ProjectCourse needs the weight to be set between 0 to 100");
 		}
 	}
+	
+	public void testProjectCourseShouldThrowExceptionWhenGradeWeightExceedsHundred() throws CourseException, IOException {
+		ProjectCourse projectCourse = new ProjectCourse(true, 2, 5, false, 26, "Applied Chemistry", 123245, 25);
+		
+		projectCourse.addFinalExam(60);
+		projectCourse.addMiterm(12324302, 15);
+		
+	    try {
+	    		projectCourse.addAssignment(12324301, 20);
+	    		fail("Exceeding grade weight of 100 doesn't throw an exception");
+		} catch (CourseException e) {
+			assertEquals(5, e.getErrorCode());
+			assertEquals(e.getMessage(), "The total weight for all course task has exceeded 100");
+		}
+	}
 }
