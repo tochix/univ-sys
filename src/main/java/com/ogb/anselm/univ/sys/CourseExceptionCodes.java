@@ -8,7 +8,8 @@ public enum CourseExceptionCodes {
 	INVALID_GRADE_WEIGHT(5, "The total weight for all course task has exceeded 100"),
 	INVALID_STUDENT_GRADE(6, "Student's mark for course exceeds 100"),
 	STUDENT_NOT_REGISTERED_FOR_COURSE(7, "The student is not registered for this course"),
-	COURSE_IS_FULL(8, "Course is full. Can no longer register students.");
+	COURSE_IS_FULL(8, "Course is full. Can no longer register students."),
+	INVALID_PROJECT_WEIGHT(9, "ProjectCourse needs the weight to be set between 0 to 100");
 	
 	
 	private final int code;

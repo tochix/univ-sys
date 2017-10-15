@@ -81,7 +81,7 @@ public class Course {
 		fis.close();
 	}
 	
-	private int getIntProperty(String propertyKey) {
+	protected int getIntProperty(String propertyKey) {
 		return Integer.parseInt(properties.getProperty(propertyKey));
 	}
 
@@ -149,7 +149,7 @@ public class Course {
 		return this.finalExamWeight;
 	}
 	
-	private void addToTotalWeight(int weight) throws CourseException {
+	protected void addToTotalWeight(int weight) throws CourseException {
 		if ((this.totalTaskWeight + weight) > this.maxGradeWeight) {
 			throw new CourseException(CourseExceptionCodes.INVALID_GRADE_WEIGHT);
 		}
@@ -184,7 +184,7 @@ public class Course {
 		this.students.remove(student);
 	}
 
-	private void checkAndThrowForGhostStudent(Student student) throws CourseException {
+	protected void checkAndThrowForGhostStudent(Student student) throws CourseException {
 		if (!this.students.contains(student)) {
 			throw new CourseException(CourseExceptionCodes.STUDENT_NOT_REGISTERED_FOR_COURSE);
 		}
