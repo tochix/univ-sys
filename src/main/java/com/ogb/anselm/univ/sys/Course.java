@@ -21,7 +21,7 @@ public class Course {
 	private HashMap<Integer, Integer> midTerms;
 	private HashMap<Student, Integer> studentsGrade;
 	private int finalExamWeight;
-	private int totalTaskWeight;
+	protected int totalTaskWeight;
 	private boolean enforcePrereqs;
 	private int numberOfMidterms;
 	private int numberOfAssignments;

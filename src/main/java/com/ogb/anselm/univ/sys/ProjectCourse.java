@@ -18,7 +18,7 @@ public class ProjectCourse extends Course {
 		}
 		
 		this.projectWeight = projectWeight;
-		
+		this.totalTaskWeight += projectWeight;
 	}
 
 	public int weightOfProject() {
