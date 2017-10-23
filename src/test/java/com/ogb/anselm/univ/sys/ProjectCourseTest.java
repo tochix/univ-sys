@@ -42,4 +42,9 @@ public class ProjectCourseTest extends TestCase {
 			assertEquals(e.getMessage(), "The total weight for all course task has exceeded 100");
 		}
 	}
+	
+	public void testProjectCourseShouldReturnTrueForProject() throws CourseException, IOException {
+		ProjectCourse projectCourse = new ProjectCourse(true, 2, 5, false, 26, "Applied Chemistry", 123243, 25);
+		assertTrue(projectCourse.hasProject());
+	}
 }
