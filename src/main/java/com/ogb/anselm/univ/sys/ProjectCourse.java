@@ -24,5 +24,9 @@ public class ProjectCourse extends Course {
 	public int weightOfProject() {
 		return this.projectWeight;
 	}
+	
+	public boolean hasProject() {
+		return true;
+	}
 
 }
