@@ -42,8 +42,8 @@ public class CourseTest extends TestCase {
 		List<Student> students = course.students();
 		assertTrue("Student list is not empty", students.isEmpty());
 		
-		Student student1 = new Student("Denzel Washington", 10160139, 12);
-		Student student2 = new Student("Ethan Hawke", 10160149, 16);
+		Student student1 = new Student("Denzel Washington", 10160139, 12, true);
+		Student student2 = new Student("Ethan Hawke", 10160149, 16, true);
 		
 		course.addStudent(student1);
 		course.addStudent(student2);
@@ -134,7 +134,7 @@ public class CourseTest extends TestCase {
 	
 	public void testCourseShouldThrowExceptionWhenStudentGradeIsAboveHundred() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
-		Student student = new Student("Ethan Hawke", 10160149, 16);
+		Student student = new Student("Ethan Hawke", 10160149, 16, true);
 		
 		course.addStudent(student);
 		course.addFinalExam(100);
@@ -149,7 +149,7 @@ public class CourseTest extends TestCase {
 	
 	public void testCourseShouldThrowExceptionWhenAddingGradeForGhostStudent() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
-		Student student = new Student("Ethan Hawke", 10160149, 16);
+		Student student = new Student("Ethan Hawke", 10160149, 16, true);
 		
 		course.addFinalExam(100);
 		
@@ -164,7 +164,7 @@ public class CourseTest extends TestCase {
 	
 	public void testCourseShouldReturnMarkForStudent() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
-		Student student = new Student("Ethan Hawke", 10160149, 16);
+		Student student = new Student("Ethan Hawke", 10160149, 16, true);
 		
 		course.addStudent(student);
 		course.addFinalExam(100);
@@ -179,35 +179,35 @@ public class CourseTest extends TestCase {
 	
 	public void testCourseShouldStateCapacityOfCourseAndNotGoOverLimit() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
-		Student student1 = new Student("Ethan Hawke", 10160149, 16);
+		Student student1 = new Student("Ethan Hawke", 10160149, 16, true);
 		
 		course.addStudent(student1);
 		assertFalse(course.isFull());
 		
-		Student student2 = new Student("Mabel Hawke", 10160150, 16);
-		Student student3 = new Student("Jonah Hawke", 10160151, 16);
-		Student student4 = new Student("Wendy Hawke", 10160152, 12);
-		Student student5 = new Student("Tom Hawke", 10160153, 12);
-		Student student6 = new Student("Hogan Hawke", 101601454, 15);
-		Student student7 = new Student("Sam Hawke", 10160155, 15);
-		Student student8 = new Student("Mike Hawke", 10160156, 14);
-		Student student9 = new Student("John Hawke", 10160157, 14);
-		Student student10 = new Student("Peter Hawke", 10160158, 16);
-		Student student11 = new Student("Tommy Hawke", 10160159, 16);
-		Student student12 = new Student("Seleck Hawke", 10160160, 16);
-		Student student13 = new Student("Judy Hawke", 10160161, 16);
-		Student student14 = new Student("Jude Hawke", 10160162, 16);
-		Student student15 = new Student("Basil Hawke", 10160163, 16);
-		Student student16 = new Student("Gana Hawke", 10160164, 16);
-		Student student17 = new Student("Richard Hawke", 10160165, 16);
-		Student student18 = new Student("Alex Hawke", 10160166, 16);
-		Student student19 = new Student("Cindy Hawke", 10160167, 16);
-		Student student20 = new Student("Sarah Hawke", 10160168, 16);
-		Student student21 = new Student("Sara Hawke", 10160169, 16);
-		Student student22 = new Student("Vatsa Hawke", 10160170, 16);
-		Student student23 = new Student("Peggy Hawke", 10160171, 16);
-		Student student24 = new Student("Mary Hawke", 10160172, 16);
-		Student student25 = new Student("Frank Hawke", 10160173, 16);
+		Student student2 = new Student("Mabel Hawke", 10160150, 16, true);
+		Student student3 = new Student("Jonah Hawke", 10160151, 16, true);
+		Student student4 = new Student("Wendy Hawke", 10160152, 12, true);
+		Student student5 = new Student("Tom Hawke", 10160153, 12, true);
+		Student student6 = new Student("Hogan Hawke", 101601454, 15, true);
+		Student student7 = new Student("Sam Hawke", 10160155, 15, true);
+		Student student8 = new Student("Mike Hawke", 10160156, 14, true);
+		Student student9 = new Student("John Hawke", 10160157, 14, true);
+		Student student10 = new Student("Peter Hawke", 10160158, 16, false);
+		Student student11 = new Student("Tommy Hawke", 10160159, 16, false);
+		Student student12 = new Student("Seleck Hawke", 10160160, 16, false);
+		Student student13 = new Student("Judy Hawke", 10160161, 16, false);
+		Student student14 = new Student("Jude Hawke", 10160162, 16, false);
+		Student student15 = new Student("Basil Hawke", 10160163, 16, false);
+		Student student16 = new Student("Gana Hawke", 10160164, 16, false);
+		Student student17 = new Student("Richard Hawke", 10160165, 16, false);
+		Student student18 = new Student("Alex Hawke", 10160166, 16, false);
+		Student student19 = new Student("Cindy Hawke", 10160167, 16, true);
+		Student student20 = new Student("Sarah Hawke", 10160168, 16, true);
+		Student student21 = new Student("Sara Hawke", 10160169, 16, true);
+		Student student22 = new Student("Vatsa Hawke", 10160170, 16, true);
+		Student student23 = new Student("Peggy Hawke", 10160171, 16, true);
+		Student student24 = new Student("Mary Hawke", 10160172, 16, true);
+		Student student25 = new Student("Frank Hawke", 10160173, 16, true);
 		
 		course.addStudent(student2);
 		course.addStudent(student3);
@@ -236,12 +236,12 @@ public class CourseTest extends TestCase {
 		
 		assertFalse(course.isFull());
 		
-		Student student26 = new Student("Sandra Hawke", 10160174, 16);
+		Student student26 = new Student("Sandra Hawke", 10160174, 16, true);
 		course.addStudent(student26);
 		assertTrue(course.isFull());
 		
 		try {
-			Student student27 = new Student("Bella Hawke", 10160175, 16);
+			Student student27 = new Student("Bella Hawke", 10160175, 16, true);
 			course.addStudent(student27);
 			fail("Exception not throw on registering student after course limit has been reached.");
 		} catch (CourseException e) {
@@ -257,8 +257,8 @@ public class CourseTest extends TestCase {
 		assertTrue("Course does not return list of students", students instanceof List);
 		assertTrue("Student list is not empty", students.isEmpty());
 		
-		Student student1 = new Student("Denzel Washington", 10160139, 12);
-		Student student2 = new Student("Ethan Hawke", 10160149, 16);
+		Student student1 = new Student("Denzel Washington", 10160139, 12, true);
+		Student student2 = new Student("Ethan Hawke", 10160149, 16, true);
 		
 		course.addStudent(student1);
 		course.addStudent(student2);
@@ -276,8 +276,8 @@ public class CourseTest extends TestCase {
 		assertTrue("Course does not return list of students", students instanceof List);
 		assertTrue("Student list is not empty", students.isEmpty());
 		
-		Student student1 = new Student("Denzel Washington", 10160139, 12);
-		Student student2 = new Student("Ethan Hawke", 10160149, 16);
+		Student student1 = new Student("Denzel Washington", 10160139, 12, true);
+		Student student2 = new Student("Ethan Hawke", 10160149, 16, true);
 		
 		course.addStudent(student1);
 		course.addStudent(student2);
@@ -295,7 +295,7 @@ public class CourseTest extends TestCase {
 	
 	public void testCourseShouldThrowExceptionOnRemovingGhostStudent() throws CourseException, IOException {
 		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
-		Student student1 = new Student("Denzel Washington", 10160139, 12);
+		Student student1 = new Student("Denzel Washington", 10160139, 12, true);
 		
 		try {
 			course.removeStudent(student1);

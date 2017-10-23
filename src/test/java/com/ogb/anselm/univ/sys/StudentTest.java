@@ -6,7 +6,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 public class StudentTest extends TestCase {
-	public void testStudentShouldListCompletedCourses() {
+	public void testStudentShouldListCompletedCourses() throws CourseException, IOException {
 		Student student = new Student("John Carmack", 101061639, 12, true);
 		Course course1 = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
 		Course course2 = new Course(true, 1, 2, false, 28, "Ecology", 123245);
@@ -54,8 +54,8 @@ public class StudentTest extends TestCase {
 		Student student = new Student("John Carmack", 101061639, 12, false);
 		assertFalse(student.isFullTime());
 		
-		Student student = new Student("Wayne Damian", 101061747, 16, true);
-		assertTrue(student.isFullTime());
+		Student student2 = new Student("Wayne Damian", 101061747, 16, true);
+		assertTrue(student2.isFullTime());
 	}
 	
 	public void testStudentShouldReturnCreationStatus() {
@@ -67,7 +67,7 @@ public class StudentTest extends TestCase {
 		assertTrue(student.isCreated());
 	}
 	
-	public void testStudentShouldRegisterToCourse() {
+	public void testStudentShouldRegisterToCourse() throws CourseException, IOException {
 		Student student = new Student("John Carmack", 101061639, 12, true);
 		Course course1 = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
 		Course course2 = new Course(true, 1, 2, false, 28, "Ecology", 123245);
@@ -84,7 +84,7 @@ public class StudentTest extends TestCase {
 		assertTrue(currentCourses.contains(course2));
 	}
 	
-	public void testStudentShouldDropCourse() {
+	public void testStudentShouldDropCourse() throws CourseException, IOException {
 		Student student = new Student("John Carmack", 101061639, 12, true);
 		Course course1 = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
 		Course course2 = new Course(true, 1, 2, false, 28, "Ecology", 123245);
@@ -108,12 +108,25 @@ public class StudentTest extends TestCase {
 		currentCourses = student.currentCourses();
 		
 		assertEquals(1, droppedCourses.size());
-		assertEquals(1, currentCourses);
+		assertEquals(1, currentCourses.size());
 		assertTrue(droppedCourses.contains(course1));
 		assertTrue(currentCourses.contains(course2));
 	}
 	
-	public void testStudentShouldAllowDeregisteringOfCourse() {
+	public void testStudentShouldDropOnlyRegisteredCourses() throws CourseException, IOException {
+		Student student = new Student("John Carmack", 101061639, 12, true);
+		Course course = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
+		
+		try {
+			student.dropCourse(course);
+	    		fail("Exception not thrown when dropping an unregistered course from the student.");
+		} catch (CourseException e) {
+			assertEquals(7, e.getErrorCode());
+			assertEquals(e.getMessage(), "The student is not registered for this course");
+		}
+	}
+	
+	public void testStudentShouldAllowDeregisteringOfCourse() throws CourseException, IOException {
 		Student student = new Student("John Carmack", 101061639, 12, true);
 		Course course1 = new Course(true, 2, 5, false, 26, "Applied Chemistry", 123243);
 		Course course2 = new Course(true, 1, 2, false, 28, "Ecology", 123245);
@@ -135,7 +148,7 @@ public class StudentTest extends TestCase {
 		student.deRegisterCourse(course1);
 		currentCourses = student.currentCourses();
 		
-		assertEquals(1, currentCourses);
+		assertEquals(1, currentCourses.size());
 		assertTrue(currentCourses.contains(course2));
 	}
 	
