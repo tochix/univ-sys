@@ -48,6 +48,12 @@ public class StudentTest extends TestCase {
 		assertEquals(2, currentCourses.size());
 		assertTrue(currentCourses.contains(course1));
 		assertTrue(currentCourses.contains(course2));
+		
+		List<Student> studentsInCourse1 = course1.students();
+		List<Student> studentsInCourse2 = course2.students();
+		
+		assertTrue(studentsInCourse1.contains(student));
+		assertTrue(studentsInCourse2.contains(student));
 	}
 	
 	public void testStudentShouldReturnFullTimeStatusOfStudent() {
@@ -63,7 +69,7 @@ public class StudentTest extends TestCase {
 		assertFalse(student.isCreated());
 		
 		University univ = new University();
-		student.enrolToUnivesity(univ);
+		student.enrolToUniversity(univ);
 		assertTrue(student.isCreated());
 	}
 	
@@ -111,6 +117,11 @@ public class StudentTest extends TestCase {
 		assertEquals(1, currentCourses.size());
 		assertTrue(droppedCourses.contains(course1));
 		assertTrue(currentCourses.contains(course2));
+		
+		List<Student> studentsInCourse1 = course1.students();
+		List<Student> studentsInCourse2 = course2.students();
+		assertFalse(studentsInCourse1.contains(student));
+		assertTrue(studentsInCourse2.contains(student));
 	}
 	
 	public void testStudentShouldDropOnlyRegisteredCourses() throws CourseException, IOException {
@@ -150,6 +161,11 @@ public class StudentTest extends TestCase {
 		
 		assertEquals(1, currentCourses.size());
 		assertTrue(currentCourses.contains(course2));
+		
+		List<Student> studentsInCourse1 = course1.students();
+		List<Student> studentsInCourse2 = course2.students();
+		assertFalse(studentsInCourse1.contains(student));
+		assertTrue(studentsInCourse2.contains(student));
 	}
 	
 }
