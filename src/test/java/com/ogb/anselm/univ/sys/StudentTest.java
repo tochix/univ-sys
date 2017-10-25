@@ -68,7 +68,7 @@ public class StudentTest extends TestCase {
 		Student student = new Student("John Carmack", 101061639, 12, false);
 		assertFalse(student.isCreated());
 		
-		University univ = new University();
+		University univ = new University("Carleton");
 		student.enrolToUniversity(univ);
 		assertTrue(student.isCreated());
 	}
