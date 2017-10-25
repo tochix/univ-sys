@@ -60,7 +60,7 @@ public class Student {
 		return university instanceof University;
 	}
 
-	public void enrolToUnivesity(University univ) {
+	public void enrolToUniversity(University univ) {
 		this.university = univ;
 	}
 
@@ -70,7 +70,7 @@ public class Student {
 
 	public void dropCourse(Course course) throws CourseException {
 		this.deRegisterCourse(course);
-		droppedCourses.add(course);
+		this.droppedCourses.add(course);
 	}
 	
 	public void deRegisterCourse(Course course) throws CourseException {
@@ -78,6 +78,8 @@ public class Student {
 			throw new CourseException(CourseExceptionCodes.STUDENT_NOT_REGISTERED_FOR_COURSE);
 		}
 		
-		currentCourses.remove(course);
+		course.removeStudent(this);
+		this.currentCourses.remove(course);
 	}
+	
 }

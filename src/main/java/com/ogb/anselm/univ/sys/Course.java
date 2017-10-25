@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -106,7 +107,9 @@ public class Course {
 			throw new CourseException(CourseExceptionCodes.COURSE_IS_FULL);
 		}
 		
-		this.students.add(student);
+		if (!this.students.contains(student)) {
+			this.students.add(student);
+		}
 	}
 
 	public List<Integer> preRequisites() {
@@ -190,4 +193,14 @@ public class Course {
 		}
 	}
 	
+	public void deRegisterAllStudents() throws CourseException {
+		Iterator<Student> studentIterator = this.students.iterator();
+		
+		while (studentIterator.hasNext()) {
+			Student student = studentIterator.next();
+			student.deRegisterCourse(this);
+			
+			studentIterator = this.students.iterator();
+		}
+	}
 }
