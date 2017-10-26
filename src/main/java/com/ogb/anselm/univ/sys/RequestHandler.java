@@ -29,7 +29,7 @@ public class RequestHandler implements Runnable {
     			promptHandler.addClient(this.client, writer);
 	
     			while ((userInput = in.readLine()) != null) {
-    				userInput=userInput.replaceAll("[^A-Za-z0-9 ]", "");
+    				userInput=userInput.replaceAll("[^A-Za-z0-9; ]", "");
     				System.out.println("Received message from " + Thread.currentThread().getName() + " : " + userInput);
     				
     				promptHandler.handleInput(userInput, writer);

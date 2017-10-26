@@ -40,4 +40,12 @@ public class ConnectionState {
 	public void setLoggedIn(boolean loggedInState) {
 		this.loggedIn = loggedInState;
 	}
+
+	public boolean getLoggedInState() {
+		return this.loggedIn;
+	}
+	
+	public String toString() {
+		return this.userName + "; " + this.loggedIn + "; " + this.state;
+	}
 }

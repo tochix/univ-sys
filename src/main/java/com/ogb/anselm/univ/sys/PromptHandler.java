@@ -17,6 +17,8 @@ public class PromptHandler {
 	private BufferedWriter writer;
 	private University university;
 	private ConnectionState currentConnection;
+	private String currentThreadName;
+	private String userInput;
 	private Map<String, String> userLogins;
 	
 	public PromptHandler() throws IOException {
@@ -37,6 +39,11 @@ public class PromptHandler {
 	public void handleInput(String userInput, BufferedWriter writer) throws Exception {
 		this.getClientConnection();
 		this.writer = writer;
+		this.userInput = userInput;
+		
+		if (userInput.equals("show menu")) {
+			this.currentConnection.setState("menu-display");
+		}
 		
 		switch (this.currentConnection.getState()) {
 			case "menu-display":
@@ -44,13 +51,16 @@ public class PromptHandler {
 				this.currentConnection.setState("menu-selection");
 				break;
 			case "menu-selection":
-				this.handleMenuSelection(userInput);
+				this.handleMenuSelection();
 				break;
 			case "username-input":
-				this.handleUserNameInput(userInput);
+				this.handleUserNameInput();
 				break;
 			case "password-input":
-				this.handlePasswordInput(userInput);
+				this.handlePasswordInput();
+				break;
+			case "course-parameter-entry":
+				this.handleCourseCreation("params");
 				break;
 			default:
 				System.out.println("the state was: "+ this.currentConnection.getState());
@@ -61,7 +71,7 @@ public class PromptHandler {
 		}
 	}
 
-	private void handlePasswordInput(String passwd) throws IOException {
+	private void handlePasswordInput() throws IOException {
 		String userName = this.currentConnection.getUserName();
 		
 		if (!this.checkUserExists(userName)) {
@@ -70,7 +80,7 @@ public class PromptHandler {
 		
 		String userPasswd = this.userLogins.get(userName);
 		
-		if (!userPasswd.equals(passwd)) {
+		if (!userPasswd.equals(this.userInput)) {
 			this.displayMessage("Error: Wrong user name or password");
 			this.displayPrompt("username? ");
 			this.currentConnection.setState("username-input");
@@ -78,16 +88,17 @@ public class PromptHandler {
 		}
 		
 		this.currentConnection.setLoggedIn(true);
-		this.currentConnection.setState("menu-display");
+		this.currentConnection.setState("menu-selection");
 		this.displayMessage("Success: You're now logged in as: " + userName);
+		System.out.println("User at " + this.currentThreadName + " logged in as " + userName);
 	}
 
-	private void handleUserNameInput(String userName) throws IOException {
-		if (!this.checkUserExists(userName)) {
+	private void handleUserNameInput() throws IOException {
+		if (!this.checkUserExists(this.userInput)) {
 			return;
 		}
 		
-		this.currentConnection.setUserName(userName);
+		this.currentConnection.setUserName(this.userInput);
 		this.currentConnection.setState("password-input");
 		this.displayPrompt("password? ");
 	}
@@ -103,7 +114,7 @@ public class PromptHandler {
 		return true;
 	}
 
-	private void handleMenuSelection(String userInput) throws IOException {
+	private void handleMenuSelection() throws IOException {
 		switch (userInput) {
 			case "show menu":
 				this.presentMenu();
@@ -113,7 +124,7 @@ public class PromptHandler {
 				this.currentConnection.setState("username-input");
 				break;
 			case "create course":
-				this.handleCourseCreation();
+				this.handleCourseCreation("init");
 				break;
 			default:
 				this.displayMessage("Sorry, wrong input.");
@@ -121,8 +132,51 @@ public class PromptHandler {
 		}
 	}	
 
-	private void handleCourseCreation() throws IOException {
-		this.displayMessage("To create a course, pass in the following parameters");
+	private void handleCourseCreation(String step) throws IOException {
+		if (!this.currentConnection.getLoggedInState() || !this.currentConnection.getUserName().equals("clerk")) {
+			this.displayMessage("This operation can only be performed by a clerk. Please login as a clerk");
+			return;
+		}
+		
+		if (step == "init") {
+			String message = "To create a course, pass in the following parameters: \n"
+					+ "Course title, Course code[must be 6 integers], Course capacity[min. 25], \n"
+					+ "number of midterms[0 - 2], number of assignments [0 - 5], \n"
+					+ "has final exam[true or false]. The parameters should be separated by semicolon ';'";
+			
+			
+			this.displayMessage(message);
+			this.displayPrompt("parameters? ");
+			this.currentConnection.setState("course-parameter-entry");
+		}
+		
+		if (step == "params") {
+			String[] paramTokens = this.userInput.split(";");
+			
+			if (paramTokens.length != 6) {
+				this.displayMessage("Incomplete or invalid parameter count.");
+				return;
+			}
+			
+			try {
+				int courseCode = Integer.parseInt(paramTokens[1]);
+				int courseCapacity = Integer.parseInt(paramTokens[2]);
+				int numMidterms = Integer.parseInt(paramTokens[3]);
+				int numAssignments = Integer.parseInt(paramTokens[4]);
+				boolean hasFinal = Boolean.parseBoolean(paramTokens[5]);
+				
+				Course course = this.university.createCourse(paramTokens[0], courseCapacity, 
+						courseCode, false, numMidterms, numAssignments, hasFinal);
+				
+				this.displayMessage("Success: Course has been created");
+				this.displayMessage(course.toString());
+				this.currentConnection.setState("menu-selection");
+				System.out.println("Clerk at " + this.currentThreadName + " created course " + course);
+				
+			} catch (Exception e) {
+				this.displayMessage("An Exception Occured: " + e.getMessage());
+			}	
+		}
 	}
 
 	private void presentMenu() throws IOException {
@@ -151,10 +205,10 @@ public class PromptHandler {
 	}
 
 	private void getClientConnection() throws Exception {
-		String currentThreadName = Thread.currentThread().getName();
+		this.currentThreadName = Thread.currentThread().getName();
 		
 		for (ConnectionState connection : this.connections) {	
-			if (currentThreadName.equals(connection.getThreadName())) {
+			if (this.currentThreadName.equals(connection.getThreadName())) {
 				this.currentConnection = connection;
 				return;
 			}
