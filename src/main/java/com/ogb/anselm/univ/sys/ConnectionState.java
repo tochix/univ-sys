@@ -5,13 +5,16 @@ import java.net.Socket;
 public class ConnectionState {
 	private String threadName;
 	private String state;
+	private String userName;
+	private boolean loggedIn;
 	private Socket clientSocket;
 	
 	public ConnectionState(Socket sock) {
 		this.clientSocket = sock;
-		this.state = "new";
+		this.state = "menu-display";
+		this.userName = "guest";
+		this.loggedIn = false;
 		this.threadName = Thread.currentThread().getName();
-		System.out.println("in connState. thread name is: "+ threadName);
 	}
 	
 	public String getThreadName() {
@@ -24,5 +27,17 @@ public class ConnectionState {
 
 	public void setState(String state) {
 		this.state = state;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getUserName() {
+		return this.userName;
+	}
+
+	public void setLoggedIn(boolean loggedInState) {
+		this.loggedIn = loggedInState;
 	}
 }
