@@ -62,6 +62,9 @@ public class PromptHandler {
 			case "course-parameter-entry":
 				this.handleCourseCreation("params");
 				break;
+			case "student-parameter-entry":
+				this.handleStudentCreation("params");
+				break;
 			default:
 				System.out.println("the state was: "+ this.currentConnection.getState());
 				writer.write("You're in an invalid state! Go Away!");
@@ -126,15 +129,67 @@ public class PromptHandler {
 			case "create course":
 				this.handleCourseCreation("init");
 				break;
+			case "create student":
+				this.handleStudentCreation("init");
+				break;
 			default:
 				this.displayMessage("Sorry, wrong input.");
 				break;
 		}
-	}	
-
-	private void handleCourseCreation(String step) throws IOException {
+	}
+	
+	private boolean isUserClerk() throws IOException {
 		if (!this.currentConnection.getLoggedInState() || !this.currentConnection.getUserName().equals("clerk")) {
 			this.displayMessage("This operation can only be performed by a clerk. Please login as a clerk");
+			return false;
+		}
+		
+		return true;
+	}
+
+	private void handleStudentCreation(String step) throws IOException {
+		if (!this.isUserClerk()) {
+			return;
+		}
+		
+		if (step == "init") {
+			String message = "To create a student, pass in the following parameters: \n"
+					+ "Student's name, Student's number[int], Student's department[int], \n"
+					+ "Student's full time status[true or false]. The parameters should be separated by semicolon ';'";
+			
+			this.displayMessage(message);
+			this.displayPrompt("parameters? ");
+			this.currentConnection.setState("student-parameter-entry");
+		}
+		
+		if (step == "params") {
+			String[] paramTokens = this.userInput.split(";");
+			
+			if (paramTokens.length != 4) {
+				this.displayMessage("Incomplete or invalid parameter count.");
+				return;
+			}
+			
+			try {
+				int studentNumber = Integer.parseInt(paramTokens[1]);
+				int studentDept = Integer.parseInt(paramTokens[2]);
+				boolean isFullTime = Boolean.parseBoolean(paramTokens[3]);
+				
+				Student student = this.university.createStudent(paramTokens[0], studentNumber, studentDept, isFullTime);
+				
+				this.displayMessage("Success: Student has been created");
+				this.displayMessage(student.toString());
+				this.currentConnection.setState("menu-selection");
+				System.out.println("Clerk at " + this.currentThreadName + " created student " + student);
+				
+			} catch (Exception e) {
+				this.displayMessage("An Exception Occured: " + e.getMessage());
+			}
+		}
+	}
+
+	private void handleCourseCreation(String step) throws IOException {
+		if (!this.isUserClerk()) {
 			return;
 		}
 		

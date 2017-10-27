@@ -32,6 +32,13 @@ public class University {
 	public void enrolStudent(Student student) {
 		this.students.add(student);
 	}
+	
+	public Student createStudent(String studentName, int studentNumber, int studentDepartment, boolean fullTime) {
+		Student student = new Student(studentName, studentNumber, studentDepartment, fullTime);
+		this.enrolStudent(student);
+		
+		return student;
+	}
 
 	public Course createCourse(String name, int capSize, int code, boolean enforcePrereqs,
 			int numMidterms, int numAssignments, boolean hasFinal) 
