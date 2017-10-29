@@ -132,12 +132,21 @@ public class PromptHandler {
 			case "create student":
 				this.handleStudentCreation("init");
 				break;
+			case "list courses":
+				this.listCourses();
+				break;
 			default:
 				this.displayMessage("Sorry, wrong input.");
 				break;
 		}
 	}
 	
+	private void listCourses() throws IOException {
+		for (Course course : this.university.courses()) {
+			this.displayMessage(course.toString());
+		}
+	}
+
 	private boolean isUserClerk() throws IOException {
 		if (!this.currentConnection.getLoggedInState() || !this.currentConnection.getUserName().equals("clerk")) {
 			this.displayMessage("This operation can only be performed by a clerk. Please login as a clerk");

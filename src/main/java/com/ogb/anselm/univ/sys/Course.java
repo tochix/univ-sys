@@ -203,4 +203,27 @@ public class Course {
 			studentIterator = this.students.iterator();
 		}
 	}
+	
+	public String toString() {
+		String courseDesc = "---\n Course %s has %d assignments, %d midterms and %s final exam. \n"
+				+ " Course code is %d, and capacity is %d students. Course is currently %s. \n"
+				+ " %d students are registered to the course.";
+		
+		if (this.students.size() > 0) {
+			courseDesc += "They are: ";
+			
+			for (Student student : this.students) {
+				courseDesc += "\n \t" + student.name() + " with student number: " + 
+						student.studentNumber();
+			}
+		}
+		
+		courseDesc += "\n---";
+		String finalStr = hasAFinal ? "a" : "no";
+		String fullStr = isFull() ? "full" : "not full";
+		courseDesc = String.format(courseDesc, title, numberOfAssignments, numberOfMidterms, 
+				finalStr, myCode, capSize, fullStr, students.size());
+		
+		return courseDesc;
+	}
 }
