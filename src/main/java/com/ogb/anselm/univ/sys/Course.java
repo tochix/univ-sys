@@ -210,7 +210,7 @@ public class Course {
 				+ " %d students are registered to the course.";
 		
 		if (this.students.size() > 0) {
-			courseDesc += "They are: ";
+			courseDesc += " They are: ";
 			
 			for (Student student : this.students) {
 				courseDesc += "\n \t" + student.name() + " with student number: " + 

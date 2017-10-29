@@ -87,7 +87,7 @@ public class Student {
 				+ " He is currently registered in %d courses. \n";
 		
 		if (this.currentCourses.size() > 0) {
-			studentDesc += "They are: ";
+			studentDesc += " They are: ";
 			
 			for (Course course : this.currentCourses) {
 				studentDesc += "\n \t" + course.title() + " with course code: " + 

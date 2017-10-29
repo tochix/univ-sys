@@ -65,6 +65,9 @@ public class PromptHandler {
 			case "student-parameter-entry":
 				this.handleStudentCreation("params");
 				break;
+			case "student-course-parameter-entry":
+				this.handleStudentCourseRegistration("params");
+				break;
 			default:
 				System.out.println("the state was: "+ this.currentConnection.getState());
 				writer.write("You're in an invalid state! Go Away!");
@@ -138,12 +141,73 @@ public class PromptHandler {
 			case "list students":
 				this.listStudents();
 				break;
+			case "register student to course":
+				this.handleStudentCourseRegistration("init");
+				break;
 			default:
 				this.displayMessage("Sorry, wrong input.");
 				break;
 		}
 	}
 	
+	private void handleStudentCourseRegistration(String step) throws IOException {
+		if (step == "init") {
+			String message = "To register a student to a course, please provide the student "
+					+ "number and the course code. \n They should be separated by a semicolon ';'";
+			
+			this.displayMessage(message);
+			this.displayPrompt("parameters? ");
+			this.currentConnection.setState("student-course-parameter-entry");
+		}
+		
+		if (step == "params") {
+			String[] paramTokens = this.userInput.split(";");
+			
+			if (paramTokens.length != 2) {
+				this.displayMessage("Incomplete or invalid parameter count.");
+				return;
+			}
+			
+			try {
+				int studentNumber = Integer.parseInt(paramTokens[0]);
+				int courseCode = Integer.parseInt(paramTokens[1]);
+				Student student = this.getStudentByNumber(studentNumber);
+				Course course = this.getCourseByCode(courseCode);
+				
+				this.university.registerStudentForCourse(course, student);
+				
+				this.displayMessage("Success: Student has been registered to the course");
+				this.displayMessage(student.toString());
+				this.currentConnection.setState("menu-selection");
+				System.out.println("User at " + this.currentThreadName + " registered student "
+						+ student.name() + "to course" + course.title());
+				
+			} catch (Exception e) {
+				this.displayMessage("An Exception Occured: " + e.getMessage());
+			}
+		}
+	}
+
+	private Course getCourseByCode(int courseCode) throws Exception {
+		for (Course course : this.university.courses()) {
+			if (course.code() == courseCode) {
+				return course;
+			}
+		}
+		
+		throw new Exception("Course with code: " + courseCode + " does not exist.");
+	}
+
+	private Student getStudentByNumber(int studentNumber) throws Exception {
+		for (Student student : this.university.students()) {
+			if (student.studentNumber() == studentNumber) {
+				return student;
+			}
+		}
+		
+		throw new Exception("Student with number: " + studentNumber + " does not exist.");
+	}
+
 	private void listStudents() throws IOException {
 		for (Student student : this.university.students()) {
 			this.displayMessage(student.toString());
@@ -261,6 +325,7 @@ public class PromptHandler {
 				+ "- Type 'list courses' to display course list. \n"
 				+ "- Type 'create student' to create a student. [only for clerks] \n"
 				+ "- Type 'create course' to create a course. [only for clerks] \n"
+				+ "- Type 'register student to course' to do register a student to a course. \n"
 				+ "- Type 'show menu' to display this menu again. \n"
 				+ "--- \n";
 		this.displayMessage(menu);
