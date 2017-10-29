@@ -82,4 +82,24 @@ public class Student {
 		this.currentCourses.remove(course);
 	}
 	
+	public String toString() {
+		String studentDesc = "--- \n Student '%s' with student number %d is a %s time student. \n"
+				+ " He is currently registered in %d courses. \n";
+		
+		if (this.currentCourses.size() > 0) {
+			studentDesc += "They are: ";
+			
+			for (Course course : this.currentCourses) {
+				studentDesc += "\n \t" + course.title() + " with course code: " + 
+						course.code();
+			}
+		}
+		
+		studentDesc += "\n---";
+		String fullStr = fullTime ? "full" : "part";
+		studentDesc = String.format(studentDesc, studentName, studentNumber, fullStr, 
+				currentCourses.size());
+		
+		return studentDesc;
+	}
 }

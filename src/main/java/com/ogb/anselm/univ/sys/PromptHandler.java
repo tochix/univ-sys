@@ -135,12 +135,21 @@ public class PromptHandler {
 			case "list courses":
 				this.listCourses();
 				break;
+			case "list students":
+				this.listStudents();
+				break;
 			default:
 				this.displayMessage("Sorry, wrong input.");
 				break;
 		}
 	}
 	
+	private void listStudents() throws IOException {
+		for (Student student : this.university.students()) {
+			this.displayMessage(student.toString());
+		}
+	}
+
 	private void listCourses() throws IOException {
 		for (Course course : this.university.courses()) {
 			this.displayMessage(course.toString());
