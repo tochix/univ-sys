@@ -19,11 +19,13 @@ public class PromptHandler {
 	private ConnectionState currentConnection;
 	private String currentThreadName;
 	private String userInput;
+	private String currentEvent;
 	private Map<String, String> userLogins;
 	
 	public PromptHandler() throws IOException {
 		connections = new ArrayList<ConnectionState>();
 		university = new University("Carleton");
+		currentEvent = "pre-semester-start";
 		this.readInUserLogins();
 	}
 
@@ -144,12 +146,19 @@ public class PromptHandler {
 			case "register student to course":
 				this.handleStudentCourseRegistration("init");
 				break;
+			case "start pre semester":
+				this.simulateEvents();
+				break;
 			default:
 				this.displayMessage("Sorry, wrong input.");
 				break;
 		}
 	}
 	
+	private void simulateEvents() {
+		
+	}
+
 	private void handleStudentCourseRegistration(String step) throws IOException {
 		if (step == "init") {
 			String message = "To register a student to a course, please provide the student "
@@ -326,6 +335,7 @@ public class PromptHandler {
 				+ "- Type 'create student' to create a student. [only for clerks] \n"
 				+ "- Type 'create course' to create a course. [only for clerks] \n"
 				+ "- Type 'register student to course' to do register a student to a course. \n"
+				+ "- Type 'start pre semester' to trigger the pre-semester start event. \n"
 				+ "- Type 'show menu' to display this menu again. \n"
 				+ "--- \n";
 		this.displayMessage(menu);
@@ -370,6 +380,10 @@ public class PromptHandler {
 				this.userLogins.put(loginToken[0], loginToken[1]);
 			}
 		}
+	}
+	
+	private int getIntProperty(String propertyKey) {
+		return Integer.parseInt(properties.getProperty(propertyKey));
 	}
 	
 }
