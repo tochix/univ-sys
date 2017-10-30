@@ -81,7 +81,7 @@ public class Course {
 		this.title = title;
 		this.myCode = myCode;
 		
-		logger.info("Course has been created. " + toString());
+		logger.info("course constructor called.");
 	}
 	
 	private void loadProperties() throws IOException {
@@ -95,22 +95,28 @@ public class Course {
 	}
 
 	public String title() {
+		logger.info("course.title called");
 		return this.title;
 	}
 
 	public int numMidTerms() {
+		logger.info("course.numMidTerms called");
 		return this.numberOfMidterms;
 	}
 
 	public Integer code() {
+		logger.info("course.code called");
 		return this.myCode;
 	}
 
 	public List<Student> students() {
+		logger.info("course.students called");
 		return this.students;
 	}
 
 	public void addStudent(Student student) throws CourseException {
+		logger.info("course.addStudent called for student: \n" + student);
+		
 		if (this.isFull()) {
 			throw new CourseException(CourseExceptionCodes.COURSE_IS_FULL);
 		}
@@ -121,10 +127,13 @@ public class Course {
 	}
 
 	public List<Integer> preRequisites() {
+		logger.info("course.preRequisite called");
 		return this.preRequisiteCodes;
 	}
 
 	public void addPreRequisites(List<Course> courses) {
+		logger.info("course.addPreRequisites called");
+		
 		courses.forEach((course) -> {
 			if (!this.preRequisiteCodes.contains(course.code())) {
 				this.preRequisites.add(course);
@@ -134,29 +143,36 @@ public class Course {
 	}
 
 	public void addAssignment(int code, int weight) throws CourseException {
+		logger.info("course.addAssignment called with code "+ code +" and weight "+ weight);
+		
 		this.addToTotalWeight(weight);
 		this.assignments.put(code, weight);
 	}
 
 	public int weightOfAssignment(int code) {
+		logger.info("course.weightOfAssignment called with code: " + code);
 		return this.assignments.get(code);
 	}
 
 	public int weightOfMidterm(int code) {
+		logger.info("course.weightOfMidterm called with code: " + code);
 		return this.midTerms.get(code);
 	}
 	
 	public void addMiterm(int code, int weight) throws CourseException {
+		logger.info("course.addMiterm called");
 		this.addToTotalWeight(weight);
 		this.midTerms.put(code, weight);
 	}
 
 	public void addFinalExam(int weight) throws CourseException {
+		logger.info("course.addFinalExam called with weight: " + weight);
 		this.addToTotalWeight(weight);
 		this.finalExamWeight = weight;
 	}
 
 	public int weightOfFinal() {
+		logger.info("course.weightOfFinal called");
 		return this.finalExamWeight;
 	}
 	
@@ -169,6 +185,7 @@ public class Course {
 	}
 
 	public void addStudentGradeForFinal(Student student, int grade) throws CourseException {
+		logger.info("course.addStudentGradeForFinal called for student: " + student);
 		if (grade > 100) {
 			throw new CourseException(CourseExceptionCodes.INVALID_STUDENT_GRADE);
 		}
@@ -179,18 +196,22 @@ public class Course {
 	}
 
 	public int markForStudent(Student student) {
+		logger.info("course.markForStudent called for student: \n" + student);
 		return this.studentsGrade.get(student);
 	}
 
 	public boolean hasProject() {
+		logger.info("course.hasProject called");
 		return false;
 	}
 
 	public boolean isFull() {
+		logger.info("course.isFull called");
 		return this.students.size() >= this.capSize;
 	}
 
 	public void removeStudent(Student student) throws CourseException {
+		logger.info("course.removeStudent called");
 		this.checkAndThrowForGhostStudent(student);
 		this.students.remove(student);
 	}
@@ -202,6 +223,7 @@ public class Course {
 	}
 	
 	public void deRegisterAllStudents() throws CourseException {
+		logger.info("course.deRegisterAllStudents called");
 		Iterator<Student> studentIterator = this.students.iterator();
 		
 		while (studentIterator.hasNext()) {
