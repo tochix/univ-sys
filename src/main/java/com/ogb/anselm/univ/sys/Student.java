@@ -5,8 +5,13 @@ import java.util.List;
 
 import javax.lang.model.type.NullType;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.apache.log4j.xml.DOMConfigurator;
+
 public class Student {
 
+	private static final Logger logger = LogManager.getLogger(Student.class);
 	private String studentName;
 	private final int studentNumber;
 	private int studentDepartment;
@@ -17,6 +22,8 @@ public class Student {
 	private University university;
 	
 	public Student(String studentName, int studentNumber, int studentDepartment, boolean fullTime) {
+		DOMConfigurator.configure("log4j.xml");
+		
 		this.studentName = studentName;
 		this.studentNumber = studentNumber;
 		this.studentDepartment = studentDepartment;
@@ -25,55 +32,69 @@ public class Student {
 		this.completedCourses = new ArrayList<Course>();
 		this.currentCourses = new ArrayList<Course>();
 		this.droppedCourses = new ArrayList<Course>();
+		
+		logger.info("student constructor called");
 	}
 
 	public List<Course> completedCourses() {
+		logger.info("student.completedCourses");
 		return completedCourses;
 	}
 
 	public void addCompletedCourse(Course course) {
+		logger.info("student.addCompletedCourse called");
 		this.completedCourses.add(course);
 	}
 
 	public int studentNumber() {
+		logger.info("student.studentNumber called");
 		return this.studentNumber;
 	}
 
 	public String name() {
+		logger.info("student.name called");
 		return this.studentName;
 	}
 
 	public List<Course> currentCourses() {
+		logger.info("student.currentCourses called");
 		return this.currentCourses;
 	}
 
 	public void registerCourse(Course course) throws CourseException {
+		logger.info("student.registerCourse called");
 		course.addStudent(this);
 		this.currentCourses.add(course);
 	}
 
 	public boolean isFullTime() {
+		logger.info("student.isFullTime called");
 		return this.fullTime;
 	}
 
 	public boolean isCreated() {
+		logger.info("student.isCreated called");
 		return university instanceof University;
 	}
 
 	public void enrolToUniversity(University univ) {
+		logger.info("student.enrolToUniversity called");
 		this.university = univ;
 	}
 
 	public List<Course> getDroppedCourses() {
+		logger.info("student.getDroppedCourses called");
 		return this.droppedCourses;
 	}
 
 	public void dropCourse(Course course) throws CourseException {
+		logger.info("student.dropCourse called");
 		this.deRegisterCourse(course);
 		this.droppedCourses.add(course);
 	}
 	
 	public void deRegisterCourse(Course course) throws CourseException {
+		logger.info("student.deRegisterCourse called");
 		if (!this.currentCourses.contains(course)) {
 			throw new CourseException(CourseExceptionCodes.STUDENT_NOT_REGISTERED_FOR_COURSE);
 		}
