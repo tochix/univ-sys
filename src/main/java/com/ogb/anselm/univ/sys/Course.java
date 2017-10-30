@@ -8,8 +8,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.log4j.xml.DOMConfigurator;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 public class Course {
 	private final Properties properties = new Properties();
+	private static final Logger logger = LogManager.getLogger(Course.class);
 	private final int maxNumberOfAssignments;
 	private final int maxNumberOfMidTerms;
 	private final int minCourseCapacity;
@@ -35,6 +40,7 @@ public class Course {
 			boolean hasAFinal, int capSize, String title, int myCode) 
 					throws CourseException, IOException {
 		
+		DOMConfigurator.configure("log4j.xml");
 		this.loadProperties();
 		
 		this.maxNumberOfMidTerms = this.getIntProperty("COURSE_MAX_NUMBER_OF_MIDTERMS");
@@ -74,6 +80,8 @@ public class Course {
 		this.capSize = capSize;
 		this.title = title;
 		this.myCode = myCode;
+		
+		logger.info("Course has been created. " + toString());
 	}
 	
 	private void loadProperties() throws IOException {
