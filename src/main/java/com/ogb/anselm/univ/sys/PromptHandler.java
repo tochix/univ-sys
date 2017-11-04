@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,17 +22,19 @@ public class PromptHandler {
 	private String userInput;
 	private String currentEvent;
 	private Map<String, String> userLogins;
+	private boolean semesterEventStarted;
 	
 	public PromptHandler() throws IOException {
 		connections = new ArrayList<ConnectionState>();
 		university = new University("Carleton");
 		currentEvent = "pre-semester-start";
+		semesterEventStarted = false;
 		this.readInUserLogins();
 	}
 
 	public void addClient(Socket clientSocket, BufferedWriter writer) throws Exception {
 		this.writer = writer;
-		ConnectionState cState = new ConnectionState(clientSocket);
+		ConnectionState cState = new ConnectionState(clientSocket, writer);
 		this.connections.add(cState);
 		
 		this.displayMessage("Hello! Welcome to the University System \n");
@@ -147,7 +150,8 @@ public class PromptHandler {
 				this.handleStudentCourseRegistration("init");
 				break;
 			case "start pre semester":
-				this.simulateEvents();
+				this.semesterEventStarted = true;
+				this.startEventsThread();
 				break;
 			default:
 				this.displayMessage("Sorry, wrong input.");
@@ -155,8 +159,67 @@ public class PromptHandler {
 		}
 	}
 	
-	private void simulateEvents() {
+	private void startEventsThread() {
+		Runnable runnable = new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					simulateEvents();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		};
 		
+		new Thread(runnable).start();
+	}
+
+	private void simulateEvents() throws IOException, InterruptedException {
+		this.displayMessageToAll("curr thread: " + Thread.currentThread().getName());
+		
+		boolean runningEvents = true;
+		int eventDayCycle = this.getIntProperty("EVENT_DAY_LENGTH_IN_SECS");
+		int preSemesterDays = eventDayCycle * this.getIntProperty("EVENT_PRE_SEMESTER_IN_DAYS");
+		int studentRegDays = (eventDayCycle * 
+				this.getIntProperty("EVENT_STUDENT_REGISTRATION_IN_DAYS")) + preSemesterDays;
+		int semesterDays = (eventDayCycle * 
+				this.getIntProperty("EVENT_SEMESTER_LENGTH_IN_DAYS")) + preSemesterDays;
+		long startTime = System.nanoTime();
+		
+		this.displayMessageToAll("pre semester event started");
+		this.displayMessageToAll("cycle: "+ eventDayCycle +"; pre semester: " + preSemesterDays
+				+ "; student reg: "+ studentRegDays + "; semester days: " + semesterDays);
+		
+		while (runningEvents) {
+			Thread.sleep(eventDayCycle * 1000);
+			
+			long elapsedTime = (System.nanoTime() - startTime) / 1000000000;
+			this.displayMessageToAll("elapsed time: "+ elapsedTime);
+			
+			if (elapsedTime >= semesterDays) {
+				this.displayMessageToAll("semester has ended event fired");
+				runningEvents = false;
+			}
+			
+			if (elapsedTime >= studentRegDays) {
+				this.displayMessageToAll("semester registration has ended event fired");
+				continue;
+			}
+			
+			if (elapsedTime >= preSemesterDays) {
+				this.displayMessageToAll("semester begin event fired");
+				continue;
+			}
+		}
+	}
+
+	private void displayMessageToAll(String message) throws IOException {
+		System.out.println(message);
+		
+		for (ConnectionState connection : this.connections) {
+			connection.sendMessage(message);
+		}
 	}
 
 	private void handleStudentCourseRegistration(String step) throws IOException {

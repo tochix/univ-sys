@@ -1,5 +1,7 @@
 package com.ogb.anselm.univ.sys;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.net.Socket;
 
 public class ConnectionState {
@@ -8,12 +10,14 @@ public class ConnectionState {
 	private String userName;
 	private boolean loggedIn;
 	private Socket clientSocket;
+	private BufferedWriter writer;
 	
-	public ConnectionState(Socket sock) {
+	public ConnectionState(Socket sock, BufferedWriter writer) {
 		this.clientSocket = sock;
 		this.state = "menu-display";
 		this.userName = "guest";
 		this.loggedIn = false;
+		this.writer = writer;
 		this.threadName = Thread.currentThread().getName();
 	}
 	
@@ -43,6 +47,12 @@ public class ConnectionState {
 
 	public boolean getLoggedInState() {
 		return this.loggedIn;
+	}
+	
+	public void sendMessage(String message) throws IOException {
+		writer.write(message);
+		writer.newLine();
+		writer.flush();
 	}
 	
 	public String toString() {
