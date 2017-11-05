@@ -19,6 +19,7 @@ public class Student {
 	private List<Course> completedCourses;
 	private List<Course> currentCourses;
 	private List<Course> droppedCourses;
+	private List<Integer> courseGrades;
 	private University university;
 	
 	public Student(String studentName, int studentNumber, int studentDepartment, boolean fullTime) {
@@ -32,6 +33,7 @@ public class Student {
 		this.completedCourses = new ArrayList<Course>();
 		this.currentCourses = new ArrayList<Course>();
 		this.droppedCourses = new ArrayList<Course>();
+		this.courseGrades = new ArrayList<Integer>();
 		
 		logger.info("student constructor called");
 	}
@@ -122,5 +124,29 @@ public class Student {
 				currentCourses.size());
 		
 		return studentDesc;
+	}
+
+	public void addCourseGrade(int grade) {
+		this.courseGrades.add(grade);
+	}
+	
+	public float getAverageGrade() {
+		int numCourses = this.courseGrades.size();
+		int gradesSum = 0;
+		
+		if (numCourses <= 0) {
+			return 0;
+		}
+		
+		for (int grade : this.courseGrades) {
+			gradesSum += grade;
+		}
+		
+		if (gradesSum <= 0) {
+			return 0;
+		}
+		
+		int avg = gradesSum / numCourses;
+		return avg;
 	}
 }

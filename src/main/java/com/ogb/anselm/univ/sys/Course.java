@@ -193,6 +193,7 @@ public class Course {
 		this.checkAndThrowForGhostStudent(student);
 		
 		this.studentsGrade.put(student, grade);
+		student.addCourseGrade(grade);
 	}
 
 	public int markForStudent(Student student) {

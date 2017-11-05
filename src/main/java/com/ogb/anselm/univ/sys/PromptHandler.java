@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 
 public class PromptHandler {
 	
@@ -175,7 +176,7 @@ public class PromptHandler {
 		new Thread(runnable).start();
 	}
 
-	private void simulateEvents() throws IOException, InterruptedException {
+	private void simulateEvents() throws IOException, InterruptedException, CourseException {
 		this.displayMessageToAll("curr thread: " + Thread.currentThread().getName());
 		
 		boolean runningEvents = true;
@@ -217,6 +218,9 @@ public class PromptHandler {
 			
 			if (elapsedTime >= semesterDays) {
 				this.switchEvent("semester-end", dayCount, "semester has ended event fired");
+				this.submitGradesForStudents();
+				this.displayDeansList();
+				
 				runningEvents = false;
 				
 				continue;
@@ -260,6 +264,50 @@ public class PromptHandler {
 						"All courses and students should have been created by now");
 				continue;
 			}
+		}
+	}
+
+	private void displayDeansList() throws IOException {
+		this.displayMessageToAll("Below is the Dean's list for exceptional students");
+		int deansScore = this.getIntProperty("DEANS_SCORE");
+		int numStudents = 0;
+		float studentAvgScore;
+		
+		for (Student student : this.university.students()) {
+			if (!student.isFullTime()) {
+				continue;
+			}
+			
+			studentAvgScore = student.getAverageGrade();
+			
+			if (studentAvgScore >= deansScore) {
+				numStudents++;
+				this.displayMessageToAll("\t Student " + student.name() + " with an average "
+						+ "score of " + studentAvgScore + "%");
+			}
+		}
+		
+		if (numStudents == 0) {
+			this.displayMessageToAll("\t No student qualified for the Dean's list");
+		}
+	}
+
+	private void submitGradesForStudents() throws CourseException, IOException {
+		Random randomIntGenerator = new Random();
+		this.displayMessageToAll("Below are courses and student grades");
+		
+		for (Course course : this.university.courses()) {
+			this.displayMessageToAll("\t--- Course " + course.title() + " has student grades: ");
+			
+			for (Student student : course.students()) {
+				int grade = randomIntGenerator.nextInt(101);
+				course.addStudentGradeForFinal(student, grade);
+				
+				this.displayMessageToAll("\t\t Student " + student.name() + " has a grade of "
+						+ course.markForStudent(student) + "%");
+			}
+			
+			this.displayMessageToAll("\t---");
 		}
 	}
 
