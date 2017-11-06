@@ -202,7 +202,7 @@ public class PromptHandler {
 		
 		int semesterDays = (eventDayCycle * 
 				this.getIntProperty("EVENT_SEMESTER_LENGTH_IN_DAYS")) + preSemesterDays;
-		int dayCount = preSemesterDays * -1;
+		int dayCount = (preSemesterDays / eventDayCycle) * -1;
 		
 		this.currentEvent = "pre-semester-start";
 		this.displayMessageToAll("pre semester event has started");

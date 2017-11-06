@@ -50,9 +50,12 @@ public class ConnectionState {
 	}
 	
 	public void sendMessage(String message) throws IOException {
-		writer.write(message);
-		writer.newLine();
-		writer.flush();
+		try {
+			writer.write(message);
+			writer.newLine();
+			writer.flush();
+		} catch (Exception e) {
+		}
 	}
 	
 	public String toString() {
