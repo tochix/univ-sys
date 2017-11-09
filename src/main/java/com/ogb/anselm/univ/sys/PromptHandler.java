@@ -160,7 +160,11 @@ public class PromptHandler {
 		}
 	}
 	
-	private void startEventsThread() {
+	private void startEventsThread() throws IOException {
+		if (this.hasPastEvent(EventCodes.PRE_SEMESTER_START)) {
+			return;
+		}
+		
 		Runnable runnable = new Runnable() {
 			
 			@Override
@@ -219,8 +223,8 @@ public class PromptHandler {
 		while (runningEvents) {
 			dayCount++;
 			
-			Thread.sleep((eventDayCycle * 1000) / 1);
-			long elapsedTime = ((System.nanoTime() - startTime) / 1000000000) * 1;
+			Thread.sleep((eventDayCycle * 1000) / 4);
+			long elapsedTime = ((System.nanoTime() - startTime) / 1000000000) * 4;
 			
 			if (elapsedTime >= semesterDays) {
 				this.switchEvent(EventCodes.SEMESTER_END, dayCount, "semester has ended event fired");
@@ -354,6 +358,10 @@ public class PromptHandler {
 	}
 
 	private void handleStudentCourseRegistration(String step) throws IOException {
+		if (this.hasPastEvent(EventCodes.STUDENT_REGISTRATION_END)) {
+			return;
+		}
+		
 		if (step == "init") {
 			String message = "To register a student to a course, please provide the student "
 					+ "number and the course code. \n They should be separated by a semicolon ';'";
@@ -437,6 +445,10 @@ public class PromptHandler {
 			return;
 		}
 		
+		if (this.hasPastEvent(EventCodes.STUDENT_REGISTRATION_END)) {
+			return;
+		}
+		
 		if (step == "init") {
 			String message = "To create a student, pass in the following parameters: \n"
 					+ "Student's name, Student's number[int], Student's department[int], \n"
@@ -473,8 +485,21 @@ public class PromptHandler {
 		}
 	}
 
+	private boolean hasPastEvent(EventCodes event) throws IOException {
+		if (this.currentEvent.getCode() <= event.getCode()) {
+			return false;
+		}
+		
+		this.displayMessage("Deadline has passed for running this command");
+		return true;
+	}
+
 	private void handleCourseCreation(String step) throws IOException {
 		if (!this.isUserClerk()) {
+			return;
+		}
+		
+		if (this.hasPastEvent(EventCodes.PRE_SEMESTER_END)) {
 			return;
 		}
 		
