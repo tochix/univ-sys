@@ -74,6 +74,12 @@ public class PromptHandler {
 			case "student-course-parameter-entry":
 				this.handleStudentCourseRegistration("params");
 				break;
+			case "student-course-dereg-parameter-entry":
+				deregisterCourse("params");
+				break;
+			case "student-drop-course-parameter-entry":
+				this.dropCourse("params");
+				break;
 			default:
 				System.out.println("the state was: "+ this.currentConnection.getState());
 				writer.write("You're in an invalid state! Go Away!");
@@ -149,6 +155,12 @@ public class PromptHandler {
 				break;
 			case "register student to course":
 				this.handleStudentCourseRegistration("init");
+				break;
+			case "deregister course":
+				this.deregisterCourse("init");
+				break;
+			case "drop course":
+				this.dropCourse("init");
 				break;
 			case "start pre semester":
 				this.semesterEventStarted = true;
@@ -398,6 +410,90 @@ public class PromptHandler {
 			}
 		}
 	}
+	
+	private void deregisterCourse(String step) throws IOException {
+		if (this.hasPastEvent(EventCodes.COURSE_DEREGISTRATION_DEADLINE)) {
+			return;
+		}
+		
+		if (step == "init") {
+			String message = "To deregister a student's course, please provide the student "
+					+ "number and the course code. \n They should be separated by a semicolon ';'";
+			
+			this.displayMessage(message);
+			this.displayPrompt("parameters? ");
+			this.currentConnection.setState("student-course-dereg-parameter-entry");
+		}
+		
+		if (step == "params") {
+			String[] paramTokens = this.userInput.split(";");
+			
+			if (paramTokens.length != 2) {
+				this.displayMessage("Incomplete or invalid parameter count.");
+				return;
+			}
+			
+			try {
+				int studentNumber = Integer.parseInt(paramTokens[0]);
+				int courseCode = Integer.parseInt(paramTokens[1]);
+				Student student = this.getStudentByNumber(studentNumber);
+				Course course = this.getCourseByCode(courseCode);
+				
+				student.deRegisterCourse(course);
+				
+				this.displayMessage("Success: Student has been deregistered from the course");
+				this.displayMessage(student.toString());
+				this.currentConnection.setState("menu-selection");
+				System.out.println("User at " + this.currentThreadName + " deregistered student "
+						+ student.name() + "from course" + course.title());
+				
+			} catch (Exception e) {
+				this.displayMessage("An Exception Occured: " + e.getMessage());
+			}
+		}
+	}
+	
+	private void dropCourse(String step) throws IOException {
+		if (this.hasPastEvent(EventCodes.DROP_COURSE_DEADLINE)) {
+			return;
+		}
+		
+		if (step == "init") {
+			String message = "To drop a student's course, please provide the student "
+					+ "number and the course code. \n They should be separated by a semicolon ';'";
+			
+			this.displayMessage(message);
+			this.displayPrompt("parameters? ");
+			this.currentConnection.setState("student-drop-course-parameter-entry");
+		}
+		
+		if (step == "params") {
+			String[] paramTokens = this.userInput.split(";");
+			
+			if (paramTokens.length != 2) {
+				this.displayMessage("Incomplete or invalid parameter count.");
+				return;
+			}
+			
+			try {
+				int studentNumber = Integer.parseInt(paramTokens[0]);
+				int courseCode = Integer.parseInt(paramTokens[1]);
+				Student student = this.getStudentByNumber(studentNumber);
+				Course course = this.getCourseByCode(courseCode);
+				
+				student.dropCourse(course);
+				
+				this.displayMessage("Success: Student has been dropped from the course");
+				this.displayMessage(student.toString());
+				this.currentConnection.setState("menu-selection");
+				System.out.println("User at " + this.currentThreadName + " dropped student "
+						+ student.name() + "from course" + course.title());
+				
+			} catch (Exception e) {
+				this.displayMessage("An Exception Occured: " + e.getMessage());
+			}
+		}
+	}
 
 	private Course getCourseByCode(int courseCode) throws Exception {
 		for (Course course : this.university.courses()) {
@@ -554,6 +650,8 @@ public class PromptHandler {
 				+ "- Type 'create student' to create a student. [only for clerks] \n"
 				+ "- Type 'create course' to create a course. [only for clerks] \n"
 				+ "- Type 'register student to course' to do register a student to a course. \n"
+				+ "- Type 'deregister course' to deregister a student's course. \n"
+				+ "- Type 'drop course' to drop a student's course. \n"
 				+ "- Type 'start pre semester' to trigger the pre-semester start event. \n"
 				+ "- Type 'show menu' to display this menu again. \n"
 				+ "--- \n";

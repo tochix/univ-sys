@@ -65,6 +65,10 @@ public class Student {
 
 	public void registerCourse(Course course) throws CourseException {
 		logger.info("student.registerCourse called");
+		if (this.currentCourses.contains(course)) {
+			return;
+		}
+		
 		course.addStudent(this);
 		this.currentCourses.add(course);
 	}
@@ -115,6 +119,15 @@ public class Student {
 			for (Course course : this.currentCourses) {
 				studentDesc += "\n \t" + course.title() + " with course code: " + 
 						course.code();
+			}
+		}
+		
+		if (this.droppedCourses.size() > 0) {
+			studentDesc += "\n Student has dropped courses: ";
+			
+			for (Course course : this.droppedCourses) {
+				studentDesc += "\n \t" + course.title() + " with course code: " + 
+						course.code() + " [DR]";
 			}
 		}
 		
