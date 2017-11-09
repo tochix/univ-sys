@@ -21,14 +21,14 @@ public class PromptHandler {
 	private ConnectionState currentConnection;
 	private String currentThreadName;
 	private String userInput;
-	private String currentEvent;
+	private EventCodes currentEvent;
 	private Map<String, String> userLogins;
 	private boolean semesterEventStarted;
 	
 	public PromptHandler() throws IOException {
 		connections = new ArrayList<ConnectionState>();
 		university = new University("Carleton");
-		currentEvent = "pre-semester-start";
+		currentEvent = EventCodes.PRE_SEMESTER_START;
 		semesterEventStarted = false;
 		this.readInUserLogins();
 	}
@@ -188,11 +188,17 @@ public class PromptHandler {
 		int studentRegDays = (eventDayCycle * 
 				this.getIntProperty("EVENT_STUDENT_REGISTRATION_IN_DAYS")) + preSemesterDays;
 		
+		int deRegDeadline = (eventDayCycle * 
+				this.getIntProperty("EVENT_STUDENT_DEREGISTRATION_DEADLINE")) + preSemesterDays;
+		
 		int midTermStart = (eventDayCycle * 
 				this.getIntProperty("EVENT_SEMESTER_MIDTERM_START_ON_DAY")) + preSemesterDays;
 		
 		int midTermEnd = (eventDayCycle * 
 				this.getIntProperty("EVENT_SEMESTER_MIDTERM_END_ON_DAY")) + preSemesterDays;
+		
+		int dropCourseDeadline = (eventDayCycle * 
+				this.getIntProperty("EVENT_STUDENT_DROP_COURSE_DEADLINE")) + preSemesterDays;
 		
 		int finalsStart = (eventDayCycle * 
 				this.getIntProperty("EVENT_SEMESTER_FINAL_START_ON_DAY")) + preSemesterDays;
@@ -204,7 +210,7 @@ public class PromptHandler {
 				this.getIntProperty("EVENT_SEMESTER_LENGTH_IN_DAYS")) + preSemesterDays;
 		int dayCount = (preSemesterDays / eventDayCycle) * -1;
 		
-		this.currentEvent = "pre-semester-start";
+		this.currentEvent = EventCodes.PRE_SEMESTER_START;
 		this.displayMessageToAll("pre semester event has started");
 		this.displayMessageToAll("All clerks should login and start creating courses and students");
 		System.out.println("cycle: "+ eventDayCycle +"; pre semester: " + preSemesterDays
@@ -213,11 +219,11 @@ public class PromptHandler {
 		while (runningEvents) {
 			dayCount++;
 			
-			Thread.sleep(eventDayCycle * 1000);
-			long elapsedTime = (System.nanoTime() - startTime) / 1000000000;
+			Thread.sleep((eventDayCycle * 1000) / 1);
+			long elapsedTime = ((System.nanoTime() - startTime) / 1000000000) * 1;
 			
 			if (elapsedTime >= semesterDays) {
-				this.switchEvent("semester-end", dayCount, "semester has ended event fired");
+				this.switchEvent(EventCodes.SEMESTER_END, dayCount, "semester has ended event fired");
 				this.submitGradesForStudents();
 				this.displayDeansList();
 				
@@ -227,40 +233,52 @@ public class PromptHandler {
 			}
 			
 			if (elapsedTime >= finalsEnd) {
-				this.switchEvent("semester-finals-end", dayCount,  "semester final exams end event fired");
+				this.switchEvent(EventCodes.FINALS_END, dayCount,  "semester final exams end event fired");
 				continue;
 			}
 			
 			if (elapsedTime >= finalsStart) {
-				this.switchEvent("semester-finals-start", dayCount,  "semester final exams start event fired");
+				this.switchEvent(EventCodes.FINALS_START, dayCount,  "semester final exams start event fired");
+				continue;
+			}
+			
+			if (elapsedTime >= dropCourseDeadline) {
+				this.switchEvent(EventCodes.DROP_COURSE_DEADLINE, dayCount, 
+						"semester drop course deadline event fired");
 				continue;
 			}
 			
 			if (elapsedTime > midTermEnd) {
-				this.switchEvent("semester-midterm-end", dayCount,  "semester midterm end event fired");
+				this.switchEvent(EventCodes.MID_TERM_END, dayCount,  "semester midterm end event fired");
 				continue;
 			}
 			
 			if (elapsedTime >= midTermStart) {
-				this.switchEvent("semester-midterm-start", dayCount,  "semester midterm start event fired");
+				this.switchEvent(EventCodes.MID_TERM_START, dayCount,  "semester midterm start event fired");
+				continue;
+			}
+			
+			if (elapsedTime >= deRegDeadline) {
+				this.switchEvent(EventCodes.COURSE_DEREGISTRATION_DEADLINE, dayCount, 
+						"semester course de-registration deadline event fired");
 				continue;
 			}
 			
 			if (elapsedTime >= studentRegDays) {
-				this.switchEvent("semester-student-registration-end", dayCount, 
+				this.switchEvent(EventCodes.STUDENT_REGISTRATION_END, dayCount, 
 						"semester course registration has ended event fired");
 				continue;
 			}
 			
 			if (elapsedTime > preSemesterDays) {
-				this.switchEvent("semester-student-registration-start", dayCount,  
+				this.switchEvent(EventCodes.STUDENT_REGISTRATION_START, dayCount,  
 						"semester begin and course registration event fired",
 						"Semester has started. Students can start course registration");
 				continue;
 			}
 			
 			if (elapsedTime == preSemesterDays) {
-				this.switchEvent("pre-semester-end", dayCount, "pre semester end event fired", 
+				this.switchEvent(EventCodes.PRE_SEMESTER_END, dayCount, "pre semester end event fired", 
 						"All courses and students should have been created by now");
 				continue;
 			}
@@ -311,12 +329,12 @@ public class PromptHandler {
 		}
 	}
 
-	private void switchEvent(String eventTitle, int dayCount, String ...messages) throws IOException {
-		if (this.currentEvent.equals(eventTitle)) {
+	private void switchEvent(EventCodes event, int dayCount, String ...messages) throws IOException {
+		if (this.currentEvent.equals(event)) {
 			return;
 		}
 		
-		this.currentEvent = eventTitle;
+		this.currentEvent = event;
 		this.displayMessageToAll("***");
 		this.displayMessageToAll("Day " + dayCount + " of the semester");
 		
