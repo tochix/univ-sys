@@ -40,7 +40,7 @@ public class UniversityTest extends TestCase {
 		assertTrue(universityStudents.contains(student2));
 	}
 	
-	public void testUniversityShouldCreateCourse() throws CourseException, IOException {
+	public void testUniversityShouldCreateCourse() throws CourseException, IOException, UniversityException {
 		University university = new University("Carleton");
 		Course course = university.createCourse("Applied Chemistry", 26, 123243, true, 2, 5, false);
 		

@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PromptHandler {
 	
@@ -24,13 +26,20 @@ public class PromptHandler {
 	private EventCodes currentEvent;
 	private Map<String, String> userLogins;
 	private boolean semesterEventStarted;
+	private boolean terminateEventLoop;
+	private List<String> eventsList;
 	
 	public PromptHandler() throws IOException {
 		connections = new ArrayList<ConnectionState>();
 		university = new University("Carleton");
 		currentEvent = EventCodes.PRE_SEMESTER_START;
 		semesterEventStarted = false;
+		terminateEventLoop = false;
 		this.readInUserLogins();
+				
+		eventsList = Stream.of(EventCodes.values())
+							.map(EventCodes::name)
+							.collect(Collectors.toList());
 	}
 
 	public void addClient(Socket clientSocket, BufferedWriter writer) throws Exception {
@@ -49,6 +58,10 @@ public class PromptHandler {
 		
 		if (userInput.equals("show menu")) {
 			this.currentConnection.setState("menu-display");
+		}
+		
+		if (userInput.equals("clean slate")) {
+			this.currentConnection.setState("menu-selection");
 		}
 		
 		switch (this.currentConnection.getState()) {
@@ -79,6 +92,12 @@ public class PromptHandler {
 				break;
 			case "student-drop-course-parameter-entry":
 				this.dropCourse("params");
+				break;
+			case "student-removal-parameter-entry":
+				this.removeStudent("params");
+				break;
+			case "course-removal-parameter-entry":
+				this.removeCourse("params");
 				break;
 			default:
 				System.out.println("the state was: "+ this.currentConnection.getState());
@@ -166,12 +185,113 @@ public class PromptHandler {
 				this.semesterEventStarted = true;
 				this.startEventsThread();
 				break;
+			case "current event":
+				this.displayCurrentEvent();
+				break;
+			case "list past events":
+				this.listPastEvents();
+				break;
+			case "delete student":
+				this.removeStudent("init");
+				break;
+			case "delete course":
+				this.removeCourse("init");
+				break;
+			case "clean slate":
+				this.resetSystem();
+				break;
 			default:
 				this.displayMessage("Sorry, wrong input.");
 				break;
 		}
 	}
 	
+	private void removeCourse(String step) throws IOException {
+		if (this.hasPastEvent(EventCodes.PRE_SEMESTER_END)) {
+			return;
+		}
+		
+		if (step == "init") {
+			String message = "To remove a course, please provide the course code ";
+			
+			this.displayMessage(message);
+			this.displayPrompt("parameters? ");
+			this.currentConnection.setState("course-removal-parameter-entry");
+		}
+		
+		if (step == "params") {
+			try {
+				int courseCode = Integer.parseInt(this.userInput);
+				Course course = this.getCourseByCode(courseCode);
+				university.destroyCourse(course);
+				
+				this.displayMessage("Success: Course has been removed from the university");
+				this.currentConnection.setState("menu-selection");
+				System.out.println("User at " + this.currentThreadName + " removed course "
+						+ courseCode + "from university");
+				
+			} catch (Exception e) {
+				this.displayMessage("An Exception Occured: " + e.getMessage());
+			}
+		}
+	}
+
+	private void resetSystem() throws IOException {
+		if (this.semesterEventStarted) {
+			this.terminateEventLoop = true;
+			this.semesterEventStarted = false;
+		} else {
+			this.displayMessage("Events has been reset.");
+		}
+		
+		this.currentEvent = EventCodes.PRE_SEMESTER_START;
+		this.university = new University("Carleton");
+	}
+
+	private void removeStudent(String step) throws IOException {
+		if (this.hasPastEvent(EventCodes.PRE_SEMESTER_END)) {
+			return;
+		}
+		
+		if (step == "init") {
+			String message = "To remove a student, please provide the student number ";
+			
+			this.displayMessage(message);
+			this.displayPrompt("parameters? ");
+			this.currentConnection.setState("student-removal-parameter-entry");
+		}
+		
+		if (step == "params") {
+			try {
+				int studentNumber = Integer.parseInt(this.userInput);
+				university.removeStudent(studentNumber);
+				
+				this.displayMessage("Success: Student has been removed from the university");
+				this.currentConnection.setState("menu-selection");
+				System.out.println("User at " + this.currentThreadName + " removed student "
+						+ studentNumber + "from university");
+				
+			} catch (Exception e) {
+				this.displayMessage("An Exception Occured: " + e.getMessage());
+			}
+		}
+	}
+
+	private void displayCurrentEvent() throws IOException {
+		this.displayMessage(this.currentEvent.toString());	
+	}
+
+	private void listPastEvents() throws IOException {
+		int currentEventCode = this.currentEvent.getCode();
+		this.displayMessage("Below are list of events that have past already.");
+		
+		for (int i = 0; currentEventCode > 0; currentEventCode--, i++) {
+			this.displayMessage(this.eventsList.get(i));
+		}
+		
+		this.displayMessage("---");
+	}
+
 	private void startEventsThread() throws IOException {
 		if (this.hasPastEvent(EventCodes.PRE_SEMESTER_START)) {
 			return;
@@ -196,6 +316,7 @@ public class PromptHandler {
 		this.displayMessageToAll("curr thread: " + Thread.currentThread().getName());
 		
 		boolean runningEvents = true;
+		this.semesterEventStarted = true;
 		long startTime = System.nanoTime();
 		
 		int eventDayCycle = this.getIntProperty("EVENT_DAY_LENGTH_IN_SECS");
@@ -234,6 +355,11 @@ public class PromptHandler {
 		
 		while (runningEvents) {
 			dayCount++;
+			if (this.terminateEventLoop) {
+				this.switchEvent(EventCodes.PRE_SEMESTER_START, 0, "Events has been reset.");
+				this.terminateEventLoop = false;
+				break;
+			}
 			
 			Thread.sleep((eventDayCycle * 1000) / 4);
 			long elapsedTime = ((System.nanoTime() - startTime) / 1000000000) * 4;
@@ -243,6 +369,7 @@ public class PromptHandler {
 				this.submitGradesForStudents();
 				this.displayDeansList();
 				
+				this.semesterEventStarted = false;
 				runningEvents = false;
 				
 				continue;
@@ -370,7 +497,7 @@ public class PromptHandler {
 	}
 
 	private void handleStudentCourseRegistration(String step) throws IOException {
-		if (this.hasPastEvent(EventCodes.STUDENT_REGISTRATION_END)) {
+		if (this.hasPastEvent(EventCodes.STUDENT_REGISTRATION_START)) {
 			return;
 		}
 		
@@ -541,7 +668,7 @@ public class PromptHandler {
 			return;
 		}
 		
-		if (this.hasPastEvent(EventCodes.STUDENT_REGISTRATION_END)) {
+		if (this.hasPastEvent(EventCodes.PRE_SEMESTER_END)) {
 			return;
 		}
 		
@@ -586,7 +713,7 @@ public class PromptHandler {
 			return false;
 		}
 		
-		this.displayMessage("Deadline has passed for running this command");
+		this.displayMessage("Deadline has passed for running this command: "+ this.userInput);
 		return true;
 	}
 
@@ -649,11 +776,16 @@ public class PromptHandler {
 				+ "- Type 'list courses' to display course list. \n"
 				+ "- Type 'create student' to create a student. [only for clerks] \n"
 				+ "- Type 'create course' to create a course. [only for clerks] \n"
+				+ "- Type 'delete student' to remove a student. [only for clerks] \n"
+				+ "- Type 'delete course' to remove a course. [only for clerks] \n"
 				+ "- Type 'register student to course' to do register a student to a course. \n"
 				+ "- Type 'deregister course' to deregister a student's course. \n"
 				+ "- Type 'drop course' to drop a student's course. \n"
+				+ "- Type 'current event' to get the system's current running event. \n"
+				+ "- Type 'list past events' to get the list of past events. \n"
 				+ "- Type 'start pre semester' to trigger the pre-semester start event. \n"
 				+ "- Type 'show menu' to display this menu again. \n"
+				+ "- Type 'clean slate' to reset the university system \n"
 				+ "--- \n";
 		this.displayMessage(menu);
 	}

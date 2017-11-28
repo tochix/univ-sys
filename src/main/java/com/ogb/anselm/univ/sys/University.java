@@ -45,25 +45,53 @@ public class University {
 		this.students.add(student);
 	}
 	
-	public Student createStudent(String studentName, int studentNumber, int studentDepartment, boolean fullTime) {
+	public Student createStudent(String studentName, int studentNumber, int studentDepartment, 
+			boolean fullTime) throws UniversityException {
 		logger.info("university.createStudent called");
+		
+		if (this.studentAlreadyExists(studentNumber)) {
+			throw new UniversityException(UniversityExceptionCodes.REDUNDANT_STUDENT);
+		}
 		
 		Student student = new Student(studentName, studentNumber, studentDepartment, fullTime);
 		this.enrolStudent(student);
 		
 		return student;
 	}
+	
+	private boolean studentAlreadyExists(int studentNumber) {
+		for (Student student : this.students) {
+			if (student.studentNumber() == studentNumber) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 
 	public Course createCourse(String name, int capSize, int code, boolean enforcePrereqs,
 			int numMidterms, int numAssignments, boolean hasFinal) 
-					throws CourseException, IOException {
+					throws CourseException, IOException, UniversityException {
 		
 		logger.info("university.createCourse called");
+		if (this.courseAlreadyExists(code)) {
+			throw new UniversityException(UniversityExceptionCodes.REDUNDANT_COURSE);
+		}
 		
 		Course course = new Course(enforcePrereqs, numMidterms, numAssignments, hasFinal, capSize, name, code);
 		this.courses.add(course);
 		
 		return course;
+	}
+	
+	private boolean courseAlreadyExists(int courseCode) {
+		for (Course course : this.courses) {
+			if (course.code() == courseCode) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	public void registerStudentForCourse(Course course, Student student) throws UniversityException, CourseException {
@@ -100,5 +128,28 @@ public class University {
 		
 		this.checkCourseExists(course);
 		this.courses.remove(course);
+	}
+	
+	public void removeStudent(int studentNumber) throws UniversityException, CourseException {
+		logger.info("university.removeStudent called");
+		Student student = null;
+		
+		for (Student s : this.students) {
+			if (s.studentNumber() == studentNumber) {
+				student = s;
+				break;
+			}
+		}
+		
+		if (student == null) {
+			throw new UniversityException(UniversityExceptionCodes.INVALID_STUDENT);
+		}
+		
+		List<Course> studentCourses = student.currentCourses();
+		for (Course course : studentCourses) {
+			course.removeStudent(student);
+		}
+		
+		this.students.remove(student);
 	}
 }
