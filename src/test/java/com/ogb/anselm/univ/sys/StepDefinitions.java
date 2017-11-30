@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.openqa.selenium.support.ui.Sleeper;
+import org.apache.commons.lang3.StringUtils;
 
 import cucumber.api.DataTable;
 import cucumber.api.java.After;
@@ -63,15 +63,15 @@ public class StepDefinitions extends TestCase {
 		serverResponse = sendAndWaitFor("start pre semester", "started");
 	}
 	
-	@And("^before (.*?) event occurs$")
+	@And("^before \"(.*?)\" event occurs$")
 	public void before_event_starts(String event) {
 		switch (event) {
 			case "start registration":
 				serverResponse = sendAndWaitFor("list past events", "---");
 				assertFalse(serverResponse.contains("STUDENT_REGISTRATION_START"));
 				break;
-	
 			default:
+				assertTrue("Unknown 'before event' given", false);
 				break;
 		}
 	}
@@ -88,8 +88,11 @@ public class StepDefinitions extends TestCase {
 			case "end course de-registration":
 				this.waitForEvent("COURSE_DEREGISTRATION_DEADLINE");
 				break;
+			case "end semester":
+				this.waitForEvent("SEMESTER_END");
+				break;
 			default:
-				System.out.println("got into default");
+				assertTrue("Unknown 'after event' given", false);
 				break;
 		}
 	}
@@ -101,7 +104,7 @@ public class StepDefinitions extends TestCase {
 			return;
 		}
 		
-		while (!serverResponse.contains(event)) {
+		while (!serverResponse.matches("(?s).*\\b" + event +"\\b.*")) {
 			TimeUnit.SECONDS.sleep(1);
 			serverResponse = sendAndWaitFor("list past events", "---");
 		}
@@ -346,6 +349,66 @@ public class StepDefinitions extends TestCase {
 	@And("^I verify that course c(\\d+) has been created$")
 	public void i_verify_that_course_c_has_been_created(int placeholder) throws Throwable {
 	    assertTrue(serverResponse.contains("Success: Course has been created"));
+	}
+	
+	@Then("^there should be only \"(\\d+)\" courses in the university$")
+	public void there_should_be_courses(int numCourses) throws InterruptedException {
+		serverResponse = sendAndWaitFor("list courses", "End of course listing.");
+		int matches = StringUtils.countMatches(serverResponse, "Course code is");
+		
+		assertEquals(numCourses, matches);
+	}
+	
+	@And("^the list of courses should be .+")
+	public void the_list_of_courses_should_be(DataTable courseTable) throws Throwable {
+	    List<Map<String, String>> courseTableData = courseTable.asMaps(String.class, String.class);
+	    serverResponse = sendAndWaitFor("list courses", "End of course listing.");
+	    
+	    String courseListFormat1 = "Course %s has %s assignments, %s midterms and %s final exam.";
+	    String courseListFormat2 = "Course code is %s, and capacity is %s students";
+	    String courseListFormat3 = "%s students are registered to the course.";
+	    
+	    for (Map<String, String> courseData : courseTableData) {
+	    		String courseMatch1 = String.format(courseListFormat1, courseData.get("title"),
+	    				courseData.get("numAssignments"), courseData.get("numMidterms"),
+	    				courseData.get("hasFinal").equals("true") ? "a" : "no" );
+	    		
+	    		String courseMatch2 = String.format(courseListFormat2, courseData.get("code"), 
+	    				courseData.get("capacity"));
+	    		String courseMatch3 = String.format(courseListFormat3, courseData.get("numRegisteredStudents"));
+	    		
+	    		assertTrue(serverResponse.contains(courseMatch1));
+	    		assertTrue(serverResponse.contains(courseMatch2));
+	    		assertTrue(serverResponse.contains(courseMatch3));
+	    }
+	}
+	
+	@Then("^there should only be \"(\\d+)\" students enrolled to the university$")
+	public void there_should_be_students(int numStudents) throws InterruptedException {
+		serverResponse = sendAndWaitFor("list students", "End of student listing.");
+		int matches = StringUtils.countMatches(serverResponse, "with student number");
+		
+		assertEquals(numStudents, matches);
+	}
+	
+	@And("^the list of students should be .+")
+	public void the_list_of_students_should_be(DataTable studentTable) throws Throwable {
+	    List<Map<String, String>> studentTableData = studentTable.asMaps(String.class, String.class);
+	    serverResponse = sendAndWaitFor("list students", "End of student listing.");
+	    
+	    String studentListFormat1 = "Student '%s' with student number %s is a %s time student.";
+	    String studentListFormat2 = "He is currently registered in %s courses.";
+	    
+	    for (Map<String, String> studentData : studentTableData) {
+	    		String studentMatch1 = String.format(studentListFormat1, studentData.get("name"),
+	    				studentData.get("number"),
+	    				studentData.get("fulltime").equals("true") ? "full" : "part" );
+	    		
+	    		String studentMatch2 = String.format(studentListFormat2, studentData.get("numCourses"));
+	    		
+	    		assertTrue(serverResponse.contains(studentMatch1));
+	    		assertTrue(serverResponse.contains(studentMatch2));
+	    }
 	}
 	
 	private String sendAndWaitFor(String command, String message) {

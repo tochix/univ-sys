@@ -643,15 +643,37 @@ public class PromptHandler {
 	}
 
 	private void listStudents() throws IOException {
+		String studentList = "";
+		
 		for (Student student : this.university.students()) {
-			this.displayMessage(student.toString());
+			studentList += student.toString();
 		}
+		
+		if (studentList == "") {
+			this.displayMessage("No student enrolled to the university");
+			return;
+		}
+		
+		this.displayMessage("Student list below:");
+		this.displayMessage(studentList);
+		this.displayMessage("End of student listing.");
 	}
 
 	private void listCourses() throws IOException {
+		String courseList = "";
+		
 		for (Course course : this.university.courses()) {
-			this.displayMessage(course.toString());
+			courseList += course.toString();
 		}
+		
+		if (courseList == "") {
+			this.displayMessage("No course found in the University");
+			return;
+		}
+		
+		this.displayMessage("Course list below:");
+		this.displayMessage(courseList);
+		this.displayMessage("End of course listing.");
 	}
 
 	private boolean isUserClerk() throws IOException {
@@ -796,6 +818,7 @@ public class PromptHandler {
 	}
 	
 	private void displayMessage(String message) throws IOException {
+		System.out.println("***msg to client: " + message +" ***");
 		writer.write(message);
 		writer.newLine();
 		writer.flush();
