@@ -103,6 +103,11 @@ public class Course {
 		logger.info("course.numMidTerms called");
 		return this.numberOfMidterms;
 	}
+	
+	public int numAssignments() {
+		logger.info("course.numAssignments called");
+		return this.numberOfAssignments;
+	}
 
 	public Integer code() {
 		logger.info("course.code called");
@@ -204,6 +209,11 @@ public class Course {
 	public boolean hasProject() {
 		logger.info("course.hasProject called");
 		return false;
+	}
+	
+	public boolean hasFinal() {
+		logger.info("course.hasFinal called");
+		return this.hasAFinal;
 	}
 
 	public boolean isFull() {

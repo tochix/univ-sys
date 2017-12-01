@@ -2,6 +2,7 @@ package com.ogb.anselm.univ.sys;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.List;
 
 import org.apache.log4j.LogManager;
@@ -151,5 +152,64 @@ public class University {
 		}
 		
 		this.students.remove(student);
+	}
+
+	public int submitStudentAssignment(Student student, Course course) 
+			throws UniversityException, CourseException {
+		
+		this.checkStudentExists(student);
+		this.checkCourseExists(course);
+		course.checkAndThrowForGhostStudent(student);
+		
+		if (course.numAssignments() <= 0) {
+			throw new CourseException(CourseExceptionCodes.COURSE_HAS_NO_ASSIGNMENT);
+		}
+		
+		return generateRandomGrade();
+	}
+
+	public int submitStudentMidterm(Student student, Course course) 
+			throws UniversityException, CourseException {
+		
+		this.checkStudentExists(student);
+		this.checkCourseExists(course);
+		course.checkAndThrowForGhostStudent(student);
+		
+		if (course.numMidTerms() <= 0) {
+			throw new CourseException(CourseExceptionCodes.COURSE_HAS_NO_MIDTERM);
+		}
+		
+		return generateRandomGrade();
+	}
+
+	public int submitStudentProject(Student student, Course course) 
+			throws UniversityException, CourseException {
+		
+		this.checkStudentExists(student);
+		this.checkCourseExists(course);
+		course.checkAndThrowForGhostStudent(student);
+		
+		return generateRandomGrade();
+	}
+
+	public int submitStudentFinal(Student student, Course course) 
+			throws UniversityException, CourseException {
+		
+		this.checkStudentExists(student);
+		this.checkCourseExists(course);
+		course.checkAndThrowForGhostStudent(student);
+		
+		if (!course.hasFinal()) {
+			throw new CourseException(CourseExceptionCodes.COURSE_HAS_NO_FINALS);
+		}
+		
+		return generateRandomGrade();
+	}
+	
+	private int generateRandomGrade() {
+		Random randomIntGenerator = new Random();
+		int grade = randomIntGenerator.nextInt(101);
+		
+		return grade;
 	}
 }

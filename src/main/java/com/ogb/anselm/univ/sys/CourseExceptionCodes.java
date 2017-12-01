@@ -9,8 +9,10 @@ public enum CourseExceptionCodes {
 	INVALID_STUDENT_GRADE(6, "Student's mark for course exceeds 100"),
 	STUDENT_NOT_REGISTERED_FOR_COURSE(7, "The student is not registered for this course"),
 	COURSE_IS_FULL(8, "Course is full. Can no longer register students."),
-	INVALID_PROJECT_WEIGHT(9, "ProjectCourse needs the weight to be set between 0 to 100");
-	
+	INVALID_PROJECT_WEIGHT(9, "ProjectCourse needs the weight to be set between 0 to 100"),
+	COURSE_HAS_NO_ASSIGNMENT(10, "Course has no assignments"), 
+	COURSE_HAS_NO_MIDTERM(11, "Course has no midterm"), 
+	COURSE_HAS_NO_FINALS(12, "Course has no finals");
 	
 	private final int code;
 	private String msg;

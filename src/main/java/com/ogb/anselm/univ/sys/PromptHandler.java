@@ -99,6 +99,18 @@ public class PromptHandler {
 			case "course-removal-parameter-entry":
 				this.removeCourse("params");
 				break;
+			case "submit-assignment-parameter-entry":
+				this.submitAssignment("params");
+				break;
+			case "submit-midterm-parameter-entry":
+				this.submitMidterm("params");
+				break;
+			case "submit-project-parameter-entry":
+				this.submitProject("params");
+				break;
+			case "submit-final-parameter-entry":
+				this.submitFinal("params");
+				break;
 			default:
 				System.out.println("the state was: "+ this.currentConnection.getState());
 				writer.write("You're in an invalid state! Go Away!");
@@ -200,12 +212,160 @@ public class PromptHandler {
 			case "clean slate":
 				this.resetSystem();
 				break;
+			case "submit assignment":
+				this.submitAssignment("init");
+				break;
+			case "submit midterm":
+				this.submitMidterm("init");
+				break;
+			case "submit project":
+				this.submitProject("init");
+				break;
+			case "submit finals":
+				this.submitFinal("init");
+				break;
 			default:
 				this.displayMessage("Sorry, wrong input.");
 				break;
 		}
 	}
 	
+	private void submitFinal(String step) throws IOException {
+		if (this.hasPastEvent(EventCodes.FINALS_END)) {
+			return;
+		}
+		
+		if (step == "init") {
+			String message = "To submit final exam for course, please provide the "
+					+ "student number and course code, delimited by a semi-colon(;)";
+			
+			this.displayMessage(message);
+			this.displayPrompt("parameters? ");
+			this.currentConnection.setState("submit-final-parameter-entry");
+		}
+		
+		if (step == "params") {
+			try {
+				String[] paramTokens = this.userInput.split(";");
+				int studentNumber = Integer.parseInt(paramTokens[0]);
+				int courseCode = Integer.parseInt(paramTokens[1]);
+				
+				Student student = this.getStudentByNumber(studentNumber);
+				Course course = this.getCourseByCode(courseCode);
+				int grade = university.submitStudentFinal(student, course);
+				
+				this.displayMessage("Success: Your score for the final is: " + grade + "%");
+				this.currentConnection.setState("menu-selection");
+			} catch (Exception e) {
+				this.displayMessage("An Exception Occured: " + e.getMessage());
+			}
+			
+			this.displayMessage("End finals submission ---");
+		}
+	}
+
+	private void submitProject(String step) throws IOException {
+		if (this.hasPastEvent(EventCodes.FINALS_END)) {
+			return;
+		}
+		
+		if (step == "init") {
+			String message = "To submit project for course, please provide the "
+					+ "student number and course code, delimited by a semi-colon(;)";
+			
+			this.displayMessage(message);
+			this.displayPrompt("parameters? ");
+			this.currentConnection.setState("submit-project-parameter-entry");
+		}
+		
+		if (step == "params") {
+			try {
+				String[] paramTokens = this.userInput.split(";");
+				int studentNumber = Integer.parseInt(paramTokens[0]);
+				int courseCode = Integer.parseInt(paramTokens[1]);
+				
+				Student student = this.getStudentByNumber(studentNumber);
+				Course course = this.getCourseByCode(courseCode);
+				int grade = university.submitStudentProject(student, course);
+				
+				this.displayMessage("Success: Your score for the project is: " + grade + "%");
+				this.currentConnection.setState("menu-selection");
+			} catch (Exception e) {
+				this.displayMessage("An Exception Occured: " + e.getMessage());
+			}
+			
+			this.displayMessage("End project submission ---");
+		}
+	}
+
+	private void submitMidterm(String step) throws IOException {
+		if (this.hasPastEvent(EventCodes.MID_TERM_END)) {
+			return;
+		}
+		
+		if (step == "init") {
+			String message = "To submit midterm for course, please provide the "
+					+ "student number and course code, delimited by a semi-colon(;)";
+			
+			this.displayMessage(message);
+			this.displayPrompt("parameters? ");
+			this.currentConnection.setState("submit-midterm-parameter-entry");
+		}
+		
+		if (step == "params") {
+			try {
+				String[] paramTokens = this.userInput.split(";");
+				int studentNumber = Integer.parseInt(paramTokens[0]);
+				int courseCode = Integer.parseInt(paramTokens[1]);
+				
+				Student student = this.getStudentByNumber(studentNumber);
+				Course course = this.getCourseByCode(courseCode);
+				int grade = university.submitStudentMidterm(student, course);
+				
+				this.displayMessage("Success: Your score for the midterm is: " + grade + "%");
+				this.currentConnection.setState("menu-selection");
+			} catch (Exception e) {
+				this.displayMessage("An Exception Occured: " + e.getMessage());
+			}
+			
+			this.displayMessage("End midterm submission ---");
+		}
+	}
+
+	private void submitAssignment(String step) throws IOException {
+		if (this.hasPastEvent(EventCodes.DROP_COURSE_DEADLINE)) {
+			return;
+		}
+		
+		if (step == "init") {
+			String message = "To submit assignment for course, please provide the "
+					+ "student number and course code, delimited by a semi-colon(;)";
+			
+			this.displayMessage(message);
+			this.displayPrompt("parameters? ");
+			this.currentConnection.setState("submit-assignment-parameter-entry");
+		}
+		
+		if (step == "params") {
+			try {
+				String[] paramTokens = this.userInput.split(";");
+				int studentNumber = Integer.parseInt(paramTokens[0]);
+				int courseCode = Integer.parseInt(paramTokens[1]);
+				
+				Student student = this.getStudentByNumber(studentNumber);
+				Course course = this.getCourseByCode(courseCode);
+				int grade = university.submitStudentAssignment(student, course);
+				
+				this.displayMessage("Success: Your score for the assignment is: " + grade + "%");
+				this.currentConnection.setState("menu-selection");
+			} catch (Exception e) {
+				this.displayMessage("An Exception Occured: " + e.getMessage());
+			}
+			
+			this.displayMessage("End assignment submission ---");
+		}
+	}
+
 	private void removeCourse(String step) throws IOException {
 		if (this.hasPastEvent(EventCodes.PRE_SEMESTER_END)) {
 			return;
@@ -803,6 +963,10 @@ public class PromptHandler {
 				+ "- Type 'register student to course' to do register a student to a course. \n"
 				+ "- Type 'deregister course' to deregister a student's course. \n"
 				+ "- Type 'drop course' to drop a student's course. \n"
+				+ "- Type 'submit assignment' to submit a student's course assignment. \n"
+				+ "- Type 'submit midterm' to submit a student's course midterm. \n"
+				+ "- Type 'submit project' to submit a student's course project. \n"
+				+ "- Type 'submit finals' to submit a student's course finals. \n"
 				+ "- Type 'current event' to get the system's current running event. \n"
 				+ "- Type 'list past events' to get the list of past events. \n"
 				+ "- Type 'start pre semester' to trigger the pre-semester start event. \n"

@@ -91,6 +91,18 @@ public class StepDefinitions extends TestCase {
 			case "end semester":
 				this.waitForEvent("SEMESTER_END");
 				break;
+			case "start midterm":
+				this.waitForEvent("MID_TERM_START");
+				break;
+			case "end midterm":
+				this.waitForEvent("MID_TERM_END");
+				break;
+			case "start finals":
+				this.waitForEvent("FINALS_START");
+				break;
+			case "end finals":
+				this.waitForEvent("FINALS_END");
+				break;
 			default:
 				assertTrue("Unknown 'after event' given", false);
 				break;
@@ -141,6 +153,7 @@ public class StepDefinitions extends TestCase {
 	
 	@Then("I receive a success message for \"(.*?)\"$")
 	public void i_receive_success_msg(String successScenario) {
+		
 		switch (successScenario) {
 			case "creating student":
 				assertTrue(serverResponse.contains("Success: Student has been created"));
@@ -163,6 +176,18 @@ public class StepDefinitions extends TestCase {
 			case "dropping student from course":
 				assertTrue(serverResponse.contains("Success: Student has been dropped from the course"));
 				break;
+			case "submitting assignment":
+				assertTrue(serverResponse.contains("Success: Your score for the assignment is:"));
+				break;
+			case "submitting midterm":
+				assertTrue(serverResponse.contains("Success: Your score for the midterm is:"));
+				break;
+			case "submitting project":
+				assertTrue(serverResponse.contains("Success: Your score for the project is:"));
+				break;
+			case "submitting finals":
+				assertTrue(serverResponse.contains("Success: Your score for the final is:"));
+				break;
 			default:
 				assertTrue("success scenario not matched", false);
 				break;
@@ -171,7 +196,9 @@ public class StepDefinitions extends TestCase {
 	
 	@Then("I receive an error message for \"(.*?)\"$")
 	public void i_receive_error_msg(String errorScenario) {
+		
 		switch (errorScenario) {
+			case "submitting non-existent student": 
 			case "dropping non-existent student from course":
 			case "de-registering non-existent student to course":
 			case "registering non-existent student to course":
@@ -197,12 +224,28 @@ public class StepDefinitions extends TestCase {
 				assertTrue(serverResponse.contains("An Exception Occured: There already "
 						+ "exists a course with that course code"));
 				break;
+			case "submitting finals too late":
+			case "submitting project too late":
+			case "submitting midterm too late":
+			case "submitting assignment too late":
 			case "creating course too late":
 			case "removing course too late":
 			case "creating student too late":
 			case "removing student too late":
 			case "registering too late":
 				assertTrue(serverResponse.contains("Deadline has passed for running this command"));
+				break;
+			case "non-existent assignment":
+				assertTrue(serverResponse.contains("An Exception Occured: Course has no assignments"));
+				break;
+			case "non-existent midterm":
+				assertTrue(serverResponse.contains("An Exception Occured: Course has no midterm"));
+				break;
+			case "non-existent finals":
+				assertTrue(serverResponse.contains("An Exception Occured: Course has no final"));
+				break;
+			case "wrong command":
+				assertTrue(serverResponse.contains("Sorry, wrong input."));
 				break;
 			default:
 				assertTrue("error scenario not matched", false);
@@ -339,6 +382,49 @@ public class StepDefinitions extends TestCase {
 		String params = String.format("%s;%s", this.studentNumber, this.courseCode);
 		
 		serverResponse = sendAndWaitFor(params, "course");
+	}
+	
+	@And("^I attempt to submit \"(.*?)\" for student \"(.*?)\", course \"(.*?)\".+")
+	public void i_attempt_to_submit_student_s_from_course_c(String courseComponent, 
+			String studentNumber, String courseCode) throws Throwable {
+		
+		String componentDeadline = "";
+		String command = "submit " + courseComponent;
+		
+		switch (courseComponent) {
+			case "assignment":
+				componentDeadline = "DROP_COURSE_DEADLINE";
+				break;
+			case "midterm":
+				componentDeadline = "FINALS_START";
+				break;
+			case "project":
+			case "finals":
+				componentDeadline = "FINALS_END";
+				break;
+			default:
+				assertTrue("Error for submitting unknown course component", false);
+				break;
+		}
+		
+		serverResponse = sendAndWaitFor("list past events", "---");
+		
+		if (serverResponse.contains(componentDeadline)) {
+			serverResponse = sendAndWaitFor(command, "command");
+			return;
+		}
+		
+		this.studentNumber = studentNumber;
+		this.courseCode = courseCode;
+		serverResponse = sendAndWaitFor(command, " -> parameters? ");
+		String params = String.format("%s;%s", this.studentNumber, this.courseCode);
+		
+		serverResponse = sendAndWaitFor(params, "End " + courseComponent + " submission ---");
+	}
+	
+	@And("^I attempt to run the list \"([^\"]*)\" invalid command$")
+	public void i_attempt_to_run_the_list_invalid_command(String facet) throws Throwable {
+		serverResponse = sendAndWaitFor("list " + facet, "wrong");
 	}
 	
 	@And("^I verify that student s(\\d+) has been created$")
