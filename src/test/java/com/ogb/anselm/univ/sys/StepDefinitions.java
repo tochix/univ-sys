@@ -384,6 +384,14 @@ public class StepDefinitions extends TestCase {
 		serverResponse = sendAndWaitFor(params, "course");
 	}
 	
+	@And("^I attempt to submit \"(.*?)\" for student \"(.*?)\", course \"(.*?)\"$")
+	public void i_attempt_to_submit(String courseComponent, 
+			String studentNumber, String courseCode) throws Throwable {
+		
+		this.i_attempt_to_submit_student_s_from_course_c(courseComponent, 
+				studentNumber, courseCode);
+	}
+	
 	@And("^I attempt to submit \"(.*?)\" for student \"(.*?)\", course \"(.*?)\".+")
 	public void i_attempt_to_submit_student_s_from_course_c(String courseComponent, 
 			String studentNumber, String courseCode) throws Throwable {

@@ -68,7 +68,7 @@ Feature: Run Totem Steps for the decomposed use case dependency
 		| 1432124 | 242334 |
 		And I attempt to register student s3 to course c4 with parameters:
 		| studentNumber | courseCode |
-		| 891253 | 198334 |
+		| 891253 | 148994 |
 		And I attempt to register student s4 to course c3 with parameters:
 		| studentNumber | courseCode |
 		| 761253 | 241134 |
@@ -90,17 +90,16 @@ Feature: Run Totem Steps for the decomposed use case dependency
 		And after "start midterm" event occurs
 		And I attempt to submit "midterm" for student "891253", course "148994", s3, c4
 		And after "start finals" event occurs
-		And I attempt to submit "finals" for student "761253", course "241134", s4, c3
 		And I attempt to submit "project" for student "1432124", course "242334", s2, c2
-		And I attempt to submit "finals" for student "431853", course "241134", s5, c3
+		And I attempt to submit "finals" for student "891253", course "148994", s3, c4
 		
 	Scenario: Verify System State is valid
 		And after "end semester" event occurs
 		Then there should be only "4" courses in the university
 		And the list of courses should be c6, c4, c2 and c3:
 		| title | code | capacity | numMidterms | numAssignments | hasFinal | numRegisteredStudents |
-		| Marketing | 198334 | 29 | 2 | 1 | true | 2 |
-		| Discrete Maths | 148994 | 27 | 2 | 1 | true | 0 |
+		| Marketing | 198334 | 29 | 2 | 1 | true | 1 |
+		| Discrete Maths | 148994 | 27 | 2 | 1 | true | 1 |
 		| Economy | 242334 | 27 | 0 | 0 | false | 1 |
 		| Fauna | 241134 | 28 | 1 | 0 | true | 0 |
 		Then there should only be "5" students enrolled to the university
