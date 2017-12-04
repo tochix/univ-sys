@@ -1,0 +1,137 @@
+<head>
+<title>University Online!</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</meta>
+<!-- Bootstrap -->
+
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
+	integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb"
+	crossorigin="anonymous"></link>
+</head>
+<body>
+
+	<div class="container">
+		<div class="row">
+			<div class="col-sm">
+				<form class="px-4 py-3" action="/login" method="post" 
+					th:style="${login} == '' ? 'display: block' : 'display: none'">
+					<div th:if="${errMessage}">
+						<h2 th:text="${errMessage}" />
+					</div>
+					
+					<div class="form-group">
+						<label for="exampleDropdownFormEmail1">Username</label> <input
+							type="text" class="form-control" id="exampleDropdownFormEmail1"
+							placeholder="clerk|student|prof" name="username" />
+					</div>
+					<div class="form-group">
+						<label for="exampleDropdownFormPassword1">Password</label> <input
+							type="password" class="form-control" name="password"
+							id="exampleDropdownFormPassword1" placeholder="Password"></input>
+					</div>
+					<div class="form-check">
+						<label class="form-check-label"> <input type="checkbox"
+							class="form-check-input" /> Remember me
+						</label>
+					</div>
+					<button type="submit" class="btn btn-primary">Sign in</button>
+				</form>
+				
+				<div class="dropdown-divider"></div>
+				
+				<form class="px-4 py-3" action="/course" method="post" 
+					th:style="${login} == 'clerk' ? 'display: block' : 'display: none'">
+					<div th:if="${errMessage}">
+						<h2 th:text="${errMessage}" />
+					</div>
+					
+					<div class="form-group">
+						<label for="exampleDropdownFormEmail1">Course Title</label> <input
+							type="text" class="form-control"
+							placeholder="Data Mining" name="course_title" />
+					</div>
+					<div class="form-group">
+						<label for="exampleDropdownFormPassword1">Course Code</label> <input
+							type="text" class="form-control" name="course_code"
+							placeholder="123456"></input>
+					</div>
+					<div class="form-group">
+						<label for="exampleDropdownFormPassword1">Course Capacity</label> <input
+							type="text" class="form-control" name="course_capacity"
+							placeholder="27"></input>
+					</div>
+					<div class="form-group">
+						<label for="exampleDropdownFormPassword1">Number of Assignments</label> <input
+							type="text" class="form-control" name="num_assignments"
+							placeholder="2"></input>
+					</div>
+					<div class="form-group">
+						<label for="exampleDropdownFormPassword1">Number of Midterms</label> <input
+							type="text" class="form-control" name="num_midterms"
+							placeholder="2"></input>
+					</div>
+					<div class="form-group">
+						<label for="exampleDropdownFormPassword1">Has a Final</label> 
+						<input type="radio" name="has_final" value="yes"/> Yes
+  						<input type="radio" name="has_final" value="no"/> No
+					</div>
+					<button type="submit" class="btn btn-primary">Add Course</button>
+				</form>
+				
+				<!-- <a class="dropdown-item" href="#">New around here? Sign up</a> <a
+					class="dropdown-item" href="#">Forgot password?</a>  -->
+			</div>
+			<div class="col-sm">
+				<div th:if="${message}">
+					<h2 th:text="${message}" />
+				</div>
+				
+				<div>
+					<h3>Available Courses</h3>
+					<div th:if="${errCourseMessage}">
+						<p th:text="${errCourseMessage}" class="text-danger"></p>
+					</div>
+					<div th:if="${successCourseMessage}">
+						<p th:text="${successCourseMessage}" class="text-success"></p>
+					</div>
+					
+					
+					<ul>
+						<li th:each="course : ${courses}"
+       						>
+       						
+       						<span th:text="${course.title()}"></span>
+       						<a th:text="Delete" th:href="@{|/delete-course/${course.code()}|}">[Delete]</a>
+       							
+       					</li>
+					</ul>
+					
+				</div>
+				
+				
+				<div>
+					<h3>Available Students</h3>
+					<ul>
+						<li th:each="student : ${students}"
+       						th:text="${student.name()}">No Available Student</li>
+					</ul>
+					
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+		integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
+		integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh"
+		crossorigin="anonymous"></script>
+	<script
+		src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
+		integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ"
+		crossorigin="anonymous"></script>
+</body>
