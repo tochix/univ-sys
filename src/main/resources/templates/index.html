@@ -14,10 +14,24 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-sm">
+				<div class="dropdown-divider"></div>
+				
+				<div class="px-4 py-3">
+					<span th:if="${currentEvent} == ''">
+						Semester Events has not been initialized.
+						<a id="start_pre_semester" th:if="${login} == 'clerk'" href="/start-pre-semester">
+							[Start Pre Semester]
+						</a>
+					</span>
+					
+					<span id="current_event_span" th:if="${currentEvent} != ''" 
+						th:text="@{|The University is at: ${currentEvent}|}"></span>
+				</div>
+				
 				<form class="px-4 py-3" action="/login" method="post" 
 					th:style="${login} == '' ? 'display: block' : 'display: none'">
 					<div th:if="${errMessage}">
-						<h2 th:text="${errMessage}" />
+						<h2 class="text-danger" th:text="${errMessage}" />
 					</div>
 					
 					<div class="form-group">
@@ -35,7 +49,7 @@
 							class="form-check-input" /> Remember me
 						</label>
 					</div>
-					<button type="submit" class="btn btn-primary">Sign in</button>
+					<button type="submit" name="login_submit" class="btn btn-primary">Sign in</button>
 				</form>
 				
 				<div class="dropdown-divider"></div>
@@ -76,13 +90,84 @@
 						<input type="radio" name="has_final" value="yes"/> Yes
   						<input type="radio" name="has_final" value="no"/> No
 					</div>
-					<button type="submit" class="btn btn-primary">Add Course</button>
+					<button type="submit" class="btn btn-primary" name="add_course_btn">
+						Add Course
+					</button>
 				</form>
+				
+				<div class="dropdown-divider"></div>
+				
+				<form class="px-4 py-3" action="/student" method="post" 
+					th:style="${login} == 'clerk' ? 'display: block' : 'display: none'">
+					<div th:if="${errMessage}">
+						<h2 th:text="${errMessage}" />
+					</div>
+					
+					<div class="form-group">
+						<label for="exampleDropdownFormEmail1">Student Name</label> <input
+							type="text" class="form-control"
+							placeholder="Ethan Hawke" name="student_name" />
+					</div>
+					<div class="form-group">
+						<label for="exampleDropdownFormPassword1">Student Number</label> <input
+							type="text" class="form-control" name="student_number"
+							placeholder="123456"></input>
+					</div>
+					<div class="form-group">
+						<label for="exampleDropdownFormPassword1">Department Code</label> <input
+							type="text" class="form-control" name="dept_code"
+							placeholder="27"></input>
+					</div>
+					<div class="form-group">
+						<label for="exampleDropdownFormPassword1">Is Full Time</label> 
+						<input type="radio" name="is_fulltime" value="yes"/> Yes
+  						<input type="radio" name="is_fulltime" value="no"/> No
+					</div>
+					<button type="submit" name="add_student" class="btn btn-primary">Add Student</button>
+				</form>
+				
+				<div class="dropdown-divider"></div>
+				
+				<div class="px-4 py-3" action="/student" method="post" 
+					th:style="${login} == 'student' ? 'display: block' : 'display: none'">
+					<div th:if="${errMessage}">
+						<h2 id="student_course_err_msg" th:text="${errMessage}" />
+					</div>
+					
+					<div>
+						<h3>Registered Courses</h3>
+						<div th:if="${errCourseMessage}">
+							<p th:text="${errCourseMessage}" class="text-danger"></p>
+						</div>
+						<div th:if="${successCourseMessage}">
+							<p th:text="${successCourseMessage}" class="text-success"></p>
+						</div>
+						<ul>
+							<li th:each="course : ${studentCourses}">
+	       						<span th:text="${course.title()}"></span>
+	       						
+	       						<span>
+									<a th:text="[DeRegister]" th:id="'deregister_' + ${course.code()}"
+									 th:href="@{|/deregister-course/${course.code()}/${studentId}|}"></a>
+								</span>
+								
+								<span>
+									<a th:text="[Drop]" th:id="'drop_' + ${course.code()}"
+									 th:href="@{|/drop-course/${course.code()}/${studentId}|}"></a>
+								</span>
+	       						
+	       					</li>
+						</ul>
+					</div>
+				
+				</div>
 				
 				<!-- <a class="dropdown-item" href="#">New around here? Sign up</a> <a
 					class="dropdown-item" href="#">Forgot password?</a>  -->
 			</div>
 			<div class="col-sm">
+				<div class="dropdown-divider"></div>
+				
 				<div th:if="${message}">
 					<h2 th:text="${message}" />
 				</div>
@@ -90,33 +175,72 @@
 				<div>
 					<h3>Available Courses</h3>
 					<div th:if="${errCourseMessage}">
-						<p th:text="${errCourseMessage}" class="text-danger"></p>
+						<p id="course_err_msg" th:text="${errCourseMessage}" class="text-danger"></p>
 					</div>
 					<div th:if="${successCourseMessage}">
-						<p th:text="${successCourseMessage}" class="text-success"></p>
+						<p id="course_success_msg" th:text="${successCourseMessage}" class="text-success"></p>
 					</div>
-					
-					
 					<ul>
-						<li th:each="course : ${courses}"
-       						>
+						<li th:each="course : ${courses}">
+       						<span th:id="'course_' + ${course.code()}" th:text="${course.title()}"></span>
        						
-       						<span th:text="${course.title()}"></span>
-       						<a th:text="Delete" th:href="@{|/delete-course/${course.code()}|}">[Delete]</a>
-       							
+       						<span th:if="${login} == 'clerk'">
+								<a th:text="[Delete]" th:id="'delete_course_' + ${course.code()}" th:href="@{|/delete-course/${course.code()}|}"></a>
+							</span>
+							
+							<span th:if="${login} == 'student' and ${#lists.isEmpty(studentCourses)}">
+								<a th:text="[Register]" th:id="'register_' + ${course.code()}" th:href="@{|/register-course/${course.code()}/${studentId}|}"></a>
+							</span>
+							
+							<span th:if="${login} == 'student' and ${not #lists.isEmpty(studentCourses)} and ${not #lists.contains(studentCourses, course)}">
+								<a th:text="[Register]" th:id="'register_' + ${course.code()}" th:href="@{|/register-course/${course.code()}/${studentId}|}"></a>
+							</span>
+       						
        					</li>
 					</ul>
-					
+					<div th:if="${#lists.isEmpty(courses)}">
+						<p>No Available Course.</p>
+					</div>
 				</div>
 				
 				
 				<div>
 					<h3>Available Students</h3>
+					<div th:if="${errStudentMessage}">
+						<p id="student_err_msg" th:text="${errStudentMessage}" class="text-danger"></p>
+					</div>
+					<div th:if="${successStudentMessage}">
+						<p id="student_success_msg" th:text="${successStudentMessage}" class="text-success"></p>
+					</div>
 					<ul>
-						<li th:each="student : ${students}"
-       						th:text="${student.name()}">No Available Student</li>
+						<li th:each="student : ${students}">
+       						<span th:id="'student_' + ${student.studentNumber()}" th:text="${student.name()}"></span>
+       						<a th:if="${login} == 'clerk'" th:text="[Delete]" 
+       							th:href="@{|/delete-student/${student.studentNumber()}|}"
+       							th:id="'delete_student_' + ${student.studentNumber()}"></a>
+       					</li>
 					</ul>
-					
+					<div th:if="${#lists.isEmpty(students)}">
+						<p>No Available Student.</p>
+					</div>
+				</div>
+				
+				<div th:if="${not #lists.isEmpty(courses)}">
+					<h3>Course Details</h3>
+					<ul>
+						<li th:each="course : ${courses}">
+       						<span th:text="${course}"></span>
+       					</li>
+					</ul>
+				</div>
+				
+				<div th:if="${not #lists.isEmpty(students)}">
+					<h3>Student Details</h3>
+					<ul>
+						<li th:each="student : ${students}">
+       						<span th:text="${student}"></span>
+       					</li>
+					</ul>
 				</div>
 			</div>
 		</div>

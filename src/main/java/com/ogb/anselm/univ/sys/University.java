@@ -212,4 +212,24 @@ public class University {
 		
 		return grade;
 	}
+	
+	public Course getCourseByCode(int courseCode) throws Exception {
+		for (Course course : this.courses) {
+			if (course.code() == courseCode) {
+				return course;
+			}
+		}
+		
+		throw new Exception("Course with code: " + courseCode + " does not exist.");
+	}
+
+	public Student getStudentByNumber(int studentNumber) throws Exception {
+		for (Student student : this.students) {
+			if (student.studentNumber() == studentNumber) {
+				return student;
+			}
+		}
+		
+		throw new Exception("Student with number: " + studentNumber + " does not exist.");
+	}
 }

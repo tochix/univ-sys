@@ -23,7 +23,7 @@ public class PromptHandler {
 	private ConnectionState currentConnection;
 	private String currentThreadName;
 	private String userInput;
-	private EventCodes currentEvent;
+	public EventCodes currentEvent;
 	private Map<String, String> userLogins;
 	private boolean semesterEventStarted;
 	private boolean terminateEventLoop;
@@ -452,7 +452,7 @@ public class PromptHandler {
 		this.displayMessage("---");
 	}
 
-	private void startEventsThread() throws IOException {
+	public void startEventsThread() throws IOException {
 		if (this.hasPastEvent(EventCodes.PRE_SEMESTER_START)) {
 			return;
 		}
